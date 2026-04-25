@@ -153,6 +153,7 @@
     "isCurrentEmail": "Email matches the current one",
     "invalidCode": "Invalid verification code",
     "codeExpired": "Verification code expired. Please request a new one.",
+    "emailAlreadyInUse": "This email is already in use",
     "emailDescription": "Email is used for password recovery and notifications",
     "change": "Change",
     "link": "Link",

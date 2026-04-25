@@ -10,7 +10,7 @@ const RESEND_STORAGE_KEY = 'email_verify_last_sent';
 const RESEND_COOLDOWN_MS = 3 * 60 * 1000;
 
 export function useEmailRequired() {
-  const { user, userEmail, isEmailLoaded, setUserEmail, setUserEmailVerified, setIsEmailLoaded, openVerifyModal, setOpenVerifyModal } = useStore();
+  const { user, userEmail, isEmailLoaded, setUserEmail, setUserEmailVerified, setIsEmailLoaded, openVerifyModal, setOpenVerifyModal, openEmailModal, setOpenEmailModal } = useStore();
   const { t } = useTranslation();
   const [modalOpen, setModalOpen] = useState(false);
   const [emailInput, setEmailInput] = useState('');
@@ -96,6 +96,13 @@ export function useEmailRequired() {
       sendVerifyCode(userEmail);
     }
   }, [openVerifyModal, userEmail]);
+
+  useEffect(() => {
+    if (!openEmailModal) return;
+    setOpenEmailModal(false);
+    setEmailInput('');
+    setModalOpen(true);
+  }, [openEmailModal]);
 
   const isValidEmail = (email: string) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);

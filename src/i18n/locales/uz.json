@@ -153,6 +153,7 @@
     "isCurrentEmail": "Elektron pochta joriy bilan mos keladi",
     "invalidCode": "Noto'g'ri tasdiqlash kodi",
     "codeExpired": "Tasdiqlash kodining muddati o'tdi. Iltimos, yangisini so'rang.",
+    "emailAlreadyInUse": "Bu elektron pochta allaqachon ishlatilmoqda",
     "emailDescription": "Elektron pochta parolni tiklash va bildirishnomalar uchun ishlatiladi",
     "change": "O'zgartirish",
     "link": "Bog'lash",

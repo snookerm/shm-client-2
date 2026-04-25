@@ -153,6 +153,7 @@
     "isCurrentEmail": "E-Mail stimmt mit der aktuellen überein",
     "invalidCode": "Ungültiger Bestätigungscode",
     "codeExpired": "Bestätigungscode abgelaufen. Bitte fordern Sie einen neuen an.",
+    "emailAlreadyInUse": "Diese E-Mail wird bereits verwendet",
     "emailDescription": "Die E-Mail wird zur Passwortwiederherstellung und für Benachrichtigungen verwendet",
     "change": "Ändern",
     "link": "Verknüpfen",

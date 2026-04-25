@@ -164,8 +164,11 @@ function BottomNavigation({ onPayments, onWithdrawals }: { onPayments: () => voi
   const navigate = useNavigate();
   const computedColorScheme = useComputedColorScheme('light');
   const { t } = useTranslation();
+  const { userEmail, isEmailLoaded, setOpenEmailModal } = useStore();
+  const emailBlocked = config.EMAIL_REQUIRED === 'true' && isEmailLoaded && !userEmail;
 
   const handleClick = (path: string) => {
+    if (emailBlocked && (path === '/payments' || path === '/withdrawals')) { setOpenEmailModal(true); return; }
     if (path === '/payments') { onPayments(); }
     else if (path === '/withdrawals') { onWithdrawals(); }
     else { navigate(path); }
@@ -203,6 +206,7 @@ function BottomNavigation({ onPayments, onWithdrawals }: { onPayments: () => voi
           {NAV_ITEMS.map((item) => {
             const isActive = location.pathname === item.path;
             const Icon = item.icon;
+            const isItemBlocked = emailBlocked && (item.path === '/payments' || item.path === '/withdrawals');
             return (
               <Box
                 key={item.path}
@@ -214,7 +218,8 @@ function BottomNavigation({ onPayments, onWithdrawals }: { onPayments: () => voi
                   justifyContent: 'center',
                   padding: '8px 12px',
                   borderRadius: 14,
-                  cursor: 'pointer',
+                  cursor: isItemBlocked ? 'not-allowed' : 'pointer',
+                  opacity: isItemBlocked ? 0.4 : 1,
                   background: isActive
                     ? (computedColorScheme === 'dark' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(59, 130, 246, 0.1)')
                     : 'transparent',
@@ -236,7 +241,8 @@ function BottomNavigation({ onPayments, onWithdrawals }: { onPayments: () => voi
 function AppContent() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { userEmail, isAuthenticated, isLoading, setUser, setIsLoading, logout } = useStore();
+  const { isAuthenticated, isLoading, setUser, setIsLoading, logout, userEmail, isEmailLoaded, setOpenEmailModal } = useStore();
+  const emailBlocked = config.EMAIL_REQUIRED === 'true' && isEmailLoaded && !userEmail;
   const isMobile = useMediaQuery('(max-width: 768px)');
   const { t } = useTranslation();
   const {
@@ -365,14 +371,11 @@ function AppContent() {
   const emailRequiredModal = (
     <Modal
       opened={globalEmailModalOpen}
-      onClose={() => {
-        if (config.EMAIL_REQUIRED === 'true' && !userEmail) return;
-        setGlobalEmailModalOpen(false);
-      }}
+      onClose={() => setGlobalEmailModalOpen(false)}
       title={t('profile.linkEmail')}
-      closeOnClickOutside={!(config.EMAIL_REQUIRED === 'true' && !userEmail)}
-      closeOnEscape={!(config.EMAIL_REQUIRED === 'true' && !userEmail)}
-      withCloseButton={!(config.EMAIL_REQUIRED === 'true' && !userEmail)}
+      closeOnClickOutside
+      closeOnEscape
+      withCloseButton
     >
       <Stack gap="md">
         <TextInput
@@ -389,7 +392,7 @@ function AppContent() {
           {t('profile.emailHint')}
         </Text>
         <Group justify="flex-end">
-          <Button variant="light" onClick={() => setGlobalEmailModalOpen(false)} disabled={config.EMAIL_REQUIRED === 'true' && !userEmail}>
+          <Button variant="light" onClick={() => setGlobalEmailModalOpen(false)}>
             {t('common.cancel')}
           </Button>
           <Button onClick={handleGlobalSaveEmail} loading={globalEmailSaving} disabled={!isValidEmail(globalEmailInput)}>
@@ -523,14 +526,14 @@ function AppContent() {
                 const isActive = location.pathname === item.path;
                 if (item.path === '/payments') {
                   return (
-                    <Button key={item.path} leftSection={<Icon size={16} />} variant="subtle" size="xs" radius="md" onClick={() => setPayHistoryOpen(true)}>
+                    <Button key={item.path} leftSection={<Icon size={16} />} variant="subtle" size="xs" radius="md" disabled={emailBlocked} onClick={() => emailBlocked ? setOpenEmailModal(true) : setPayHistoryOpen(true)}>
                       {t(item.labelKey)}
                     </Button>
                   );
                 }
                 if (item.path === '/withdrawals') {
                   return (
-                    <Button key={item.path} leftSection={<Icon size={16} />} variant="subtle" size="xs" radius="md" onClick={() => setWithdrawHistoryOpen(true)}>
+                    <Button key={item.path} leftSection={<Icon size={16} />} variant="subtle" size="xs" radius="md" disabled={emailBlocked} onClick={() => emailBlocked ? setOpenEmailModal(true) : setWithdrawHistoryOpen(true)}>
                       {t(item.labelKey)}
                     </Button>
                   );

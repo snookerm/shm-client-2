@@ -153,6 +153,7 @@
     "isCurrentEmail": "El correo coincide con el actual",
     "invalidCode": "Código de verificación incorrecto",
     "codeExpired": "El código de verificación expiró. Por favor solicita uno nuevo.",
+    "emailAlreadyInUse": "Este correo ya está en uso",
     "emailDescription": "El correo se usa para recuperar la contraseña y recibir notificaciones",
     "change": "Cambiar",
     "link": "Vincular",

@@ -35,6 +35,8 @@ interface AppState {
   setLastTicketCheck: (timestamp: number) => void;
   openVerifyModal: boolean;
   setOpenVerifyModal: (open: boolean) => void;
+  openEmailModal: boolean;
+  setOpenEmailModal: (open: boolean) => void;
   logout: () => void;
 }
 
@@ -49,6 +51,7 @@ export const useStore = create<AppState>((set) => ({
   hasNewTicketMessages: false,
   lastTicketCheck: parseInt(localStorage.getItem('shm_last_ticket_check') || '0'),
   openVerifyModal: false,
+  openEmailModal: false,
 
   setUser: (user) => set({
     user,
@@ -72,6 +75,7 @@ export const useStore = create<AppState>((set) => ({
     set({ lastTicketCheck: timestamp });
   },
   setOpenVerifyModal: (open) => set({ openVerifyModal: open }),
+  setOpenEmailModal: (open) => set({ openEmailModal: open }),
   logout: () => {
     removeCookie();
     localStorage.removeItem('shm_telegram_photo');

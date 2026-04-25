@@ -63,7 +63,8 @@ interface ForecastData {
 }
 
 export default function Profile() {
-  const { telegramPhoto, userEmail: storeEmail, userEmailVerified: storeEmailVerified, setUserEmail, setUserEmailVerified } = useStore();
+  const { telegramPhoto, userEmail: storeEmail, userEmailVerified: storeEmailVerified, setUserEmail, setUserEmailVerified, isEmailLoaded, setOpenEmailModal } = useStore();
+  const emailBlocked = config.EMAIL_REQUIRED === 'true' && isEmailLoaded && !storeEmail;
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -318,13 +319,16 @@ export default function Profile() {
   };
 
   const getEmailErrorMessage = (serverMsg: string): string => {
+    const normalizedServerMsg = serverMsg.trim().toLowerCase();
     const errorMap: Record<string, string> = {
       'is not email': t('profile.invalidEmail'),
       'Email mismatch. Use the email shown in your profile.': t('profile.emailMismatch'),
       'Invalid code': t('profile.invalidCode'),
       'Code expired': t('profile.codeExpired'),
+      'already in use': t('profile.emailAlreadyInUse'),
+      'email already in use': t('profile.emailAlreadyInUse'),
     };
-    return errorMap[serverMsg] || serverMsg;
+    return errorMap[serverMsg] || errorMap[normalizedServerMsg] || serverMsg;
   };
 
   const handleSaveEmail = async () => {
@@ -553,7 +557,7 @@ export default function Profile() {
                   {t('profile.balance')}: <Text c="cyan" size="xl" fw={700}>{profile.balance || '0.00'} {t('common.currency')}</Text>
                 </Group>
               </div>
-              <Button leftSection={<IconCreditCard size={18} />} color="cyan" onClick={() => { setPayModalAmount(forecast?.total ?? undefined); setPayModalOpen(true); }}>
+              <Button leftSection={<IconCreditCard size={18} />} color="cyan" onClick={() => emailBlocked ? setOpenEmailModal(true) : (setPayModalAmount(forecast?.total ?? undefined), setPayModalOpen(true))}>
                 {t('profile.topUp')}
               </Button>
             </Group>
@@ -564,7 +568,7 @@ export default function Profile() {
               <div>
                   <Text size="xm" c="dimmed">{t('profile.bonus')}: {profile.bonus}</Text>
               </div>
-              <Button onClick={() => setPromoModalOpen(true)} color="cyan">
+              <Button onClick={() => emailBlocked ? setOpenEmailModal(true) : setPromoModalOpen(true)} color="cyan">
                 {t('profile.enterPromo')}
               </Button>
             </Group>
@@ -742,7 +746,7 @@ export default function Profile() {
                   </Group>
                 </Card>
               )}
-              <Button leftSection={<IconCreditCard size={18} />} onClick={() => { setPayModalAmount(forecast?.total ?? undefined); setPayModalOpen(true); }}>
+              <Button leftSection={<IconCreditCard size={18} />} onClick={() => emailBlocked ? setOpenEmailModal(true) : (setPayModalAmount(forecast?.total ?? undefined), setPayModalOpen(true))}>
                 {t('profile.toPay')} {forecast.total} {t('common.currency')}
               </Button>
             </Stack>
@@ -817,16 +821,11 @@ export default function Profile() {
 
       <Modal
         opened={emailModalOpen}
-        onClose={() => {
-          if (config.EMAIL_REQUIRED === 'true' && !profileEmail) {
-            return;
-          }
-          setEmailModalOpen(false);
-        }}
+        onClose={() => setEmailModalOpen(false)}
         title={t('profile.linkEmail')}
-        closeOnClickOutside={!(config.EMAIL_REQUIRED === 'true' && !profileEmail)}
-        closeOnEscape={!(config.EMAIL_REQUIRED === 'true' && !profileEmail)}
-        withCloseButton={!(config.EMAIL_REQUIRED === 'true' && !profileEmail)}
+        closeOnClickOutside
+        closeOnEscape
+        withCloseButton
       >
         <Stack gap="md">
           {profile && isValidEmail(profile.login) && (
@@ -851,7 +850,7 @@ export default function Profile() {
             <Button color="red" onClick={() => handleDeleteEmail()}  disabled={!profileEmail}>
               {t('common.delete')}
             </Button>
-            <Button variant="light" onClick={() => setEmailModalOpen(false)} disabled={ config.EMAIL_REQUIRED === 'true' && !profileEmail }>
+            <Button variant="light" onClick={() => setEmailModalOpen(false)}>
               {t('common.cancel')}
             </Button>
             <Button onClick={handleSaveEmail} loading={emailSaving} disabled={!isValidEmail(emailInput)}>

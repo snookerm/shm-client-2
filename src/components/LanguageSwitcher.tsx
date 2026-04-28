@@ -1,6 +1,7 @@
 import { ActionIcon, Menu, useDirection } from '@mantine/core';
 import { IconLanguage } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
+import { config } from '../config';
 
 const languages = [
   { code: 'en', label: 'English', flag: '🇺🇸' },
@@ -17,6 +18,8 @@ const RTL_LANGUAGES = ['ar'];
 export default function LanguageSwitcher() {
   const { i18n } = useTranslation();
   const { toggleDirection, dir } = useDirection();
+
+  if (config.SINGLE_LANGUAGE === 'true' ) return null;
 
   const currentLang = languages.find(l => l.code === i18n.language) || languages[0];
 

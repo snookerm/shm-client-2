@@ -165,7 +165,7 @@ export default function OrderServiceModal({
       const filtered = isChangeMode && currentService?.service_id
         ? data.filter(service => service.service_id !== currentService.service_id)
         : data;
-      const ALLOWED_SORTINGS = ['cost_asc', 'cost_desc', 'name_asc', 'name_desc'] as const;
+      const ALLOWED_SORTINGS = ['cost_asc', 'cost_desc', 'name_asc', 'name_desc', 'descr_asc', 'descr_desc'] as const;
       type Sorting = typeof ALLOWED_SORTINGS[number];
       const rawSorting = config.ORDER_SORTING;
       const sorting: Sorting = (ALLOWED_SORTINGS as readonly string[]).includes(rawSorting)
@@ -177,6 +177,8 @@ export default function OrderServiceModal({
           case 'cost_desc': return Number(b.cost) - Number(a.cost);
           case 'name_asc':  return a.name.localeCompare(b.name);
           case 'name_desc': return b.name.localeCompare(a.name);
+          case 'descr_asc':  return (a.descr || '').localeCompare(b.descr || '');
+          case 'descr_desc': return (b.descr || '').localeCompare(a.descr || '');
           default:          return 0;
         }
       });

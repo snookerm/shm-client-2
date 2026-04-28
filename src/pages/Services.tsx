@@ -501,7 +501,7 @@ function ServiceDetail({ service, onDelete, onChangeTariff }: ServiceDetailProps
                               leftSection={<IconDeviceMobileCog size={16} />}
                               variant="light"
                             >
-                              {urlSchema ? t('services.deviceConfig') : t('services.openSubLink')}
+                              {urlSchema ? (config.DEVICE_CONFIG_TEXT ? config.DEVICE_CONFIG_TEXT : t('services.deviceConfig')) : t('services.openSubLink')}
                             </Button>
                           </Group>
                         </Timeline.Item>

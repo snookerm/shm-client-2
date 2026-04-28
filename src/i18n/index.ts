@@ -21,12 +21,18 @@ const resources = {
   ar: { translation: ar },
 };
 
+const isSingleLanguage = config.SINGLE_LANGUAGE === 'true';
+const savedLanguage = localStorage.getItem('shm_language');
+
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     resources,
-    fallbackLng: config.DEFAULT_LANGUAGE,
+    lng: isSingleLanguage
+      ? config.DEFAULT_LANGUAGE
+      : (!savedLanguage && config.DEFAULT_LANGUAGE ? config.DEFAULT_LANGUAGE : undefined),
+    fallbackLng: config.DEFAULT_LANGUAGE || 'en',
     supportedLngs: ['en', 'ru', 'de', 'es', 'fr', 'uz', 'ar'],
 
     detection: {

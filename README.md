@@ -49,20 +49,21 @@ services:
 | `PRIVACY_POLICY_URL` | Ссылка на `Политика конфиденциальности` | - |
 | `TERMS_OF_USE_URL` | Ссылка на `Условия использования` | - |
 | `PUBLIC_OFFER_URL` | Ссылка на `Договор оферты` | - |
-| `DEFAULT_LANGUAGE` | Язык системы по умолчанию | ru |
+| `DEFAULT_LANGUAGE` | Язык системы по умолчанию | `ru` |
+| `SINGLE_LANGUAGE` | Используем только 1 язык системы (Язык системы используется из переменной `DEFAULT_LANGUAGE`) | - |
 | `OTP_ENABLE` | Показать настройки OTP | `true` |
 | `PASSKEY_ENABLE` | Показать настройки Passkey | `true` |
 | `PASSKEY_AUTH_DISABLED` | Скрыть кнопку авторизации через Passkey | `false` |
 | `BITRIX_WIDGET_SCRIPT_URL` | URL виждета Битрих-24 `https://cdn-ru.bitrix24.ru/b********/crm/site_button/loader_****.js` | - |
 | `PROXY_CATEGORY` | Категория прокси чтобы показать ссылку на подписку (vpn-remna,vpn-trial) | - |
 | `PROXY_CATEGORY_TITLE` | Название категории | VPN Подписка |
-| `PROXY_STORAGE_PREFIX` | префикс для категории proxy в хранилище, например 'vpm_remna_' | 'vpm_mrzb_' |
+| `PROXY_STORAGE_PREFIX` | префикс для категории proxy в хранилище, например 'vpm_remna_' | `vpm_mrzb_` |
 | `SHOW_PROXY_SUB_LINK` | Показывать ссылку на подписку для категории proxy | `true` |
 | `SHOW_HAPP_CRYPTOLINK` | Показать крипто ссылку на подписку для категории proxy | `false` |
 | `SHOW_PROXY_QR` | Показывать кнопку `QR` на ссылку подписки для категории proxy | `true` |
 | `VPN_CATEGORY` | Категория VPN чтобы показать QR или возможность скачать файл конфигурации (vpn-wg,vpn-awg) | - |
 | `VPN_CATEGORY_TITLE` | Название категории | VPN |
-| `VPN_STORAGE_PREFIX` | Префикс для категории vpn в хранилище например 'wg_key_' | 'vpn' |
+| `VPN_STORAGE_PREFIX` | Префикс для категории vpn в хранилище например `wg_key_` | `vpn` |
 | `VISIBLE_CATEGORIES` | Категории для отображения при покупке и уже купленных услуг (vpn-mz,vpm-mz-trial) | - |
 | `EMAIL_REQUIRED` | Hе дает пользоваться ЛК пока клиент не введет email | `false` |
 | `EMAIL_VERIFY_REQUIRED` | Hе дает заказать услугу пока email не будет подтвержден | `false` |
@@ -100,8 +101,9 @@ services:
 | `MAC_PROXY_URL_SCHEMA` | URL-схема для открытия подписки на macOS (`happ://add/`) | `` |
 | `IOS_PROXY_URL_SCHEMA` | URL-схема для открытия подписки на iOS (`happ://add/`) | `` |
 | `ANDROID_PROXY_URL_SCHEMA` | URL-схема для открытия подписки на Android (`happ://add/`) | `` |
+| `DEVICE_CONFIG_TEXT` | Замена текста `Добавить в приложение` только в 1 языке | `` |
 | `CAPTCHA_ENABLED` | Включение/выключение капчи (надо включить в кабинете администратора) | `false` |
-| `ORDER_SORTING` | Сортировка услуг при покупке (cost_asc, cost_desc, name_asc, name_desc) | `cost_asc` |
+| `ORDER_SORTING` | Сортировка услуг при покупке (`cost_asc`, `cost_desc`, `name_asc`, `name_desc`, `descr_asc`, `descr_desc`) | `cost_asc` |
 | `CONTACT_EMAIL` | Почта для контакта | - |
 | `CONTACT_PHONE` | Номер телефона для контакта | - |
 

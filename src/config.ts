@@ -14,6 +14,7 @@ interface AppConfig {
   TERMS_OF_USE_URL: string;
   PUBLIC_OFFER_URL: string;
   DEFAULT_LANGUAGE: string;
+  SINGLE_LANGUAGE: string;
   SHM_BASE_PATH: string;
   OTP_ENABLE: string;
   PASSKEY_ENABLE: string;
@@ -65,6 +66,7 @@ interface AppConfig {
   MAC_PROXY_URL_SCHEMA: string;
   IOS_PROXY_URL_SCHEMA: string;
   ANDROID_PROXY_URL_SCHEMA: string;
+  DEVICE_CONFIG_TEXT: string;
   CAPTCHA_ENABLED: string;
   ORDER_SORTING: string;
   CONTACT_EMAIL: string;
@@ -96,6 +98,7 @@ function getConfig(): AppConfig {
     TERMS_OF_USE_URL: runtimeConfig?.TERMS_OF_USE_URL || import.meta.env.VITE_TERMS_OF_USE_URL || '',
     PUBLIC_OFFER_URL: runtimeConfig?.PUBLIC_OFFER_URL || import.meta.env.VITE_PUBLIC_OFFER_URL || '',
     DEFAULT_LANGUAGE: runtimeConfig?.DEFAULT_LANGUAGE || import.meta.env.VITE_DEFAULT_LANGUAGE || 'ru',
+    SINGLE_LANGUAGE: runtimeConfig?.SINGLE_LANGUAGE || import.meta.env.VITE_SINGLE_LANGUAGE || '',
     SHM_BASE_PATH: runtimeConfig?.SHM_BASE_PATH || import.meta.env.VITE_SHM_BASE_PATH || '/',
     OTP_ENABLE: runtimeConfig?.OTP_ENABLE || import.meta.env.VITE_OTP_ENABLE || 'true',
     PASSKEY_ENABLE: runtimeConfig?.PASSKEY_ENABLE || import.meta.env.VITE_PASSKEY_ENABLE || 'true',
@@ -148,6 +151,7 @@ function getConfig(): AppConfig {
     MAC_PROXY_URL_SCHEMA: runtimeConfig?.MAC_PROXY_URL_SCHEMA || import.meta.env.VITE_MAC_PROXY_URL_SCHEMA || '',
     IOS_PROXY_URL_SCHEMA: runtimeConfig?.IOS_PROXY_URL_SCHEMA || import.meta.env.VITE_IOS_PROXY_URL_SCHEMA || '',
     ANDROID_PROXY_URL_SCHEMA: runtimeConfig?.ANDROID_PROXY_URL_SCHEMA || import.meta.env.VITE_ANDROID_PROXY_URL_SCHEMA || '',
+    DEVICE_CONFIG_TEXT: runtimeConfig?.DEVICE_CONFIG_TEXT || import.meta.env.VITE_DEVICE_CONFIG_TEXT || '',
     CAPTCHA_ENABLED: runtimeConfig?.CAPTCHA_ENABLED || import.meta.env.VITE_CAPTCHA_ENABLED || 'false',
     CONTACT_EMAIL: runtimeConfig?.CONTACT_EMAIL || import.meta.env.VITE_CONTACT_EMAIL || '',
     CONTACT_PHONE: runtimeConfig?.CONTACT_PHONE || import.meta.env.VITE_CONTACT_PHONE || '',

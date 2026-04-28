@@ -231,10 +231,10 @@ function BottomNavigation({ onPayments, onWithdrawals }: { onPayments: () => voi
           boxShadow: computedColorScheme === 'dark'
             ? '0 8px 32px rgba(0, 0, 0, 0.4)'
             : '0 8px 32px rgba(0, 0, 0, 0.12)',
-          padding: '8px 12px',
+          padding: '6px 8px',
         }}
       >
-        <Group justify="space-around" gap={4}>
+        <Group justify="space-around" gap={0}>
           {NAV_ITEMS.map((item) => {
             const isActive = location.pathname === item.path;
             const Icon = item.icon;
@@ -249,8 +249,8 @@ function BottomNavigation({ onPayments, onWithdrawals }: { onPayments: () => voi
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  padding: '8px 12px',
-                  borderRadius: 14,
+                  padding: '6px 8px',
+                  borderRadius: 12,
                   cursor: isItemBlocked ? 'not-allowed' : 'pointer',
                   opacity: isItemBlocked ? 0.4 : 1,
                   background: isActive

@@ -83,7 +83,7 @@ function getConfig(): AppConfig {
   return {
     APP_NAME: runtimeConfig?.APP_NAME || import.meta.env.VITE_APP_NAME || 'SHM Client',
     APP_DESCRIPTION: runtimeConfig?.APP_DESCRIPTION || import.meta.env.VITE_APP_DESCRIPTION || '',
-    LOGO_URL: runtimeConfig?.LOGO_URL || import.meta.env.VITE_LOGO_URL || './favicon.jpg',
+    LOGO_URL: runtimeConfig?.LOGO_URL || import.meta.env.VITE_LOGO_URL || `${import.meta.env.BASE_URL}favicon.jpg`,
     TELEGRAM_BOT_NAME: runtimeConfig?.TELEGRAM_BOT_NAME || import.meta.env.VITE_TELEGRAM_BOT_NAME || '',
     TELEGRAM_BOT_AUTH_ENABLE: runtimeConfig?.TELEGRAM_BOT_AUTH_ENABLE || import.meta.env.VITE_TELEGRAM_BOT_AUTH_ENABLE || 'false',
     TELEGRAM_OIDC_AUTH_ENABLE: runtimeConfig?.TELEGRAM_OIDC_AUTH_ENABLE || import.meta.env.VITE_TELEGRAM_OIDC_AUTH_ENABLE || 'false',

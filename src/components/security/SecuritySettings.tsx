@@ -61,23 +61,23 @@ export default function SecuritySettings() {
         </Group>
 
         <Tabs defaultValue={'password'} variant="outline" value={activeTab} onChange={setActiveTab}>
-          <Tabs.List grow>
-            <Tabs.Tab value="password" leftSection={<IconLock size={14} />}>
-              {isMobile ? undefined : t('profile.changePassword')}
+          <Tabs.List grow={!isMobile} style={isMobile ? { flexWrap: 'nowrap' } : undefined}>
+            <Tabs.Tab value="password" leftSection={<IconLock size={14} />} style={isMobile ? (activeTab === 'password' ? { flex: 1, minWidth: 0, overflow: 'hidden' } : { flexShrink: 0 }) : undefined}>
+              {(!isMobile || activeTab === 'password') ? <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{t('profile.changePassword')}</span> : undefined}
             </Tabs.Tab>
             {otpEnabled && (
-              <Tabs.Tab value="otp" leftSection={<IconShield size={14} />}>
-                {isMobile ? undefined : t('otp.title')}
+              <Tabs.Tab value="otp" leftSection={<IconShield size={14} />} style={isMobile ? (activeTab === 'otp' ? { flex: 1, minWidth: 0, overflow: 'hidden' } : { flexShrink: 0 }) : undefined}>
+                {(!isMobile || activeTab === 'otp') ? <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{t('otp.title')}</span> : undefined}
               </Tabs.Tab>
             )}
             {passkeyEnabled && hasTelegramWidget && (
-              <Tabs.Tab value="passkey" leftSection={<IconFingerprint size={14} />}>
-                {isMobile ? undefined : t('passkey.title')}
+              <Tabs.Tab value="passkey" leftSection={<IconFingerprint size={14} />} style={isMobile ? (activeTab === 'passkey' ? { flex: 1, minWidth: 0, overflow: 'hidden' } : { flexShrink: 0 }) : undefined}>
+                {(!isMobile || activeTab === 'passkey') ? <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{t('passkey.title')}</span> : undefined}
               </Tabs.Tab>
             )}
             {hasTelegramWidget && (
-              <Tabs.Tab value="passwordAuth" leftSection={<IconKey size={14} />}>
-                {isMobile ? undefined : t('passwordAuth.title')}
+              <Tabs.Tab value="passwordAuth" leftSection={<IconKey size={14} />} style={isMobile ? (activeTab === 'passwordAuth' ? { flex: 1, minWidth: 0, overflow: 'hidden' } : { flexShrink: 0 }) : undefined}>
+                {(!isMobile || activeTab === 'passwordAuth') ? <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{t('passwordAuth.title')}</span> : undefined}
               </Tabs.Tab>
             )}
           </Tabs.List>

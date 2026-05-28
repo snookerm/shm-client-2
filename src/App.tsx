@@ -42,6 +42,7 @@ function LegalLinks() {
     { href: config.PRIVACY_POLICY_URL, label: t('common.privacyPolicy') },
     { href: config.TERMS_OF_USE_URL, label: t('common.termsOfUse') },
     { href: config.PUBLIC_OFFER_URL, label: t('common.publicOffer') },
+    { href: config.USER_AGREEMENT_URL, label: t('common.userAgreement') },
   ].filter((link) => Boolean(link.href));
 
   const contactLinks = [
@@ -553,7 +554,7 @@ function AppContent() {
 
   const appShellMaxWidth = 1200;
   const appShellOffset = `max(0px, calc(50% - ${appShellMaxWidth / 2}px))`;
-  const hasLegalLinks = [config.PRIVACY_POLICY_URL, config.TERMS_OF_USE_URL, config.PUBLIC_OFFER_URL, config.CONTACT_EMAIL, config.CONTACT_PHONE].some(Boolean);
+  const hasLegalLinks = [config.PRIVACY_POLICY_URL, config.TERMS_OF_USE_URL, config.PUBLIC_OFFER_URL, config.USER_AGREEMENT_URL, config.CONTACT_EMAIL, config.CONTACT_PHONE].some(Boolean);
 
   return (
     <>

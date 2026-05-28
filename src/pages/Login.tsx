@@ -117,6 +117,7 @@ export default function Login() {
     { href: config.PRIVACY_POLICY_URL, label: t('common.privacyPolicy') },
     { href: config.TERMS_OF_USE_URL, label: t('common.termsOfUse') },
     { href: config.PUBLIC_OFFER_URL, label: t('common.publicOffer') },
+    { href: config.USER_AGREEMENT_URL, label: t('common.userAgreement') },
   ].filter((link) => Boolean(link.href));
   const hasLegalLinks = legalLinks.length > 0;
 

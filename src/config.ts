@@ -13,6 +13,7 @@ interface AppConfig {
   PRIVACY_POLICY_URL: string;
   TERMS_OF_USE_URL: string;
   PUBLIC_OFFER_URL: string;
+  USER_AGREEMENT_URL: string;
   DEFAULT_LANGUAGE: string;
   SINGLE_LANGUAGE: string;
   SHM_BASE_PATH: string;
@@ -98,6 +99,7 @@ function getConfig(): AppConfig {
     PRIVACY_POLICY_URL: runtimeConfig?.PRIVACY_POLICY_URL || import.meta.env.VITE_PRIVACY_POLICY_URL || '',
     TERMS_OF_USE_URL: runtimeConfig?.TERMS_OF_USE_URL || import.meta.env.VITE_TERMS_OF_USE_URL || '',
     PUBLIC_OFFER_URL: runtimeConfig?.PUBLIC_OFFER_URL || import.meta.env.VITE_PUBLIC_OFFER_URL || '',
+    USER_AGREEMENT_URL: runtimeConfig?.USER_AGREEMENT_URL || import.meta.env.VITE_USER_AGREEMENT_URL || '',
     DEFAULT_LANGUAGE: runtimeConfig?.DEFAULT_LANGUAGE || import.meta.env.VITE_DEFAULT_LANGUAGE || 'ru',
     SINGLE_LANGUAGE: runtimeConfig?.SINGLE_LANGUAGE || import.meta.env.VITE_SINGLE_LANGUAGE || '',
     SHM_BASE_PATH: runtimeConfig?.SHM_BASE_PATH || import.meta.env.VITE_SHM_BASE_PATH || '/',

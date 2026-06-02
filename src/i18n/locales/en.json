@@ -191,6 +191,7 @@
   "services": {
     "title": "My Services",
     "orderService": "Order service",
+    "goToService": "Go to service",
     "noServices": "You don't have any active services yet",
     "serviceDetails": "Service details",
     "info": "Information",

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Timeline, Text, Stack, Group, Badge, Button, Divider, Modal, ActionIcon, Loader, Center, Paper, Title, Tabs, Code, Tooltip, Accordion, Box, Select, NumberInput, Pagination } from '@mantine/core';
-import { IconQrcode, IconCopy, IconCheck, IconDownload, IconRefresh, IconTrash, IconPlus, IconPlayerStop, IconExchange, IconCreditCard, IconWallet, IconDeviceMobileCog } from '@tabler/icons-react';
+import { IconQrcode, IconCopy, IconCheck, IconDownload, IconRefresh, IconTrash, IconPlus, IconPlayerStop, IconExchange, IconCreditCard, IconWallet, IconDeviceMobileCog, IconInfoCircle } from '@tabler/icons-react';
 import { useDisclosure, useClipboard } from '@mantine/hooks';
 import { useTranslation } from 'react-i18next';
 import { api, servicesApi, userApi } from '../api/client';
@@ -976,6 +976,13 @@ export default function Services() {
 
   const sortedCategories = sortCategoryKeys(Object.keys(groupedServices));
 
+  // #2/#2.1: VPN Подписка (proxy) — не более одной услуги. Если у юзера она уже есть,
+  // вместо кнопки «Заказать услугу» показываем «Перейти к услуге» — открывает модалку
+  // первой активной proxy-услуги (по умолчанию на табе «Информация»). Остальные категории
+  // и так не заказываются через витрину.
+  const proxyServices = groupedServices['proxy'] || [];
+  const firstProxyService = proxyServices.find((s) => s.status === 'ACTIVE') ?? proxyServices[0];
+
   if (loading) {
     return (
       <Center h={300}>
@@ -989,14 +996,24 @@ export default function Services() {
       <Group justify="space-between">
         <Title order={2}>{t('services.title')}</Title>
         <Group>
-          <Button
-            leftSection={<IconPlus size={16} />}
-            disabled={config.BLOCK_ORDER_IF_UNPAID === 'true' && hasNotPaidServices(services)}
-            title={config.BLOCK_ORDER_IF_UNPAID === 'true' && hasNotPaidServices(services) ? t('order.blockedByUnpaid') : undefined}
-            onClick={emailBlocked ? () => setOpenEmailModal(true) : (config.EMAIL_VERIFY_REQUIRED === "true" && !userEmailVerified ? () => setConfirmEmailNotVerified(true) : openOrderModal)}
-          >
-            {t('services.orderService')}
-          </Button>
+          {firstProxyService ? (
+            <Button
+              leftSection={<IconInfoCircle size={16} />}
+              variant="light"
+              onClick={() => handleServiceClick(firstProxyService)}
+            >
+              {t('services.goToService')}
+            </Button>
+          ) : (
+            <Button
+              leftSection={<IconPlus size={16} />}
+              disabled={config.BLOCK_ORDER_IF_UNPAID === 'true' && hasNotPaidServices(services)}
+              title={config.BLOCK_ORDER_IF_UNPAID === 'true' && hasNotPaidServices(services) ? t('order.blockedByUnpaid') : undefined}
+              onClick={emailBlocked ? () => setOpenEmailModal(true) : (config.EMAIL_VERIFY_REQUIRED === "true" && !userEmailVerified ? () => setConfirmEmailNotVerified(true) : openOrderModal)}
+            >
+              {t('services.orderService')}
+            </Button>
+          )}
           <Button leftSection={<IconRefresh size={16} />} variant="light" color="cyan" onClick={() => fetchServices()}>
             {t('common.refresh')}
           </Button>

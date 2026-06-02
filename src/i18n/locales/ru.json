@@ -191,6 +191,7 @@
   "services": {
     "title": "Мои услуги",
     "orderService": "Заказать услугу",
+    "goToService": "Перейти к услуге",
     "noServices": "У вас пока нет активных услуг",
     "serviceDetails": "Детали услуги",
     "info": "Информация",

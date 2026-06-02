@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Card, Text, Stack, Group, Divider, Grid, Button, TextInput, Tooltip, ActionIcon, Avatar, Title, Modal, Loader, Center, Collapse, Alert, Skeleton, useMantineColorScheme } from '@mantine/core';
-import { IconUser, IconPhone, IconCopy, IconCheck, IconBrandTelegram, IconCreditCard, IconChevronDown, IconChevronUp, IconMail, IconAlertCircle } from '@tabler/icons-react';
+import { Card, Text, Stack, Group, Divider, Grid, Button, TextInput, ActionIcon, Avatar, Title, Modal, Loader, Center, Collapse, Alert, Skeleton, Paper, useMantineColorScheme } from '@mantine/core';
+import { IconUser, IconPhone, IconCopy, IconCheck, IconBrandTelegram, IconCreditCard, IconChevronDown, IconChevronUp, IconMail, IconAlertCircle, IconGift } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { useClipboard } from '@mantine/hooks';
 import { useTranslation } from 'react-i18next';
@@ -519,35 +519,28 @@ export default function Profile() {
 
             <Divider my="md" />
 
-            <Group>
-              <div style={{ maxWidth: '80%', width: '100%' }}>
-                <Group wrap="nowrap" gap="xs" align="center">
-                  <Text
-                    size="sm"
-                    style={{
-                      flex: 1,
-                      minWidth: 0,
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                    }}
-                  >
-                    {partnerLink}
-                  </Text>
-                  <Tooltip label={clipboardLink.copied ? t('common.copied') : t('common.copy')}>
-                    <ActionIcon
-                      color={clipboardLink.copied ? 'teal' : 'gray'}
-                      variant="subtle"
-                      onClick={() => clipboardLink.copy(partnerLink)}
-                      style={{ flexShrink: 0 }}
-                    >
-                      {clipboardLink.copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
-                    </ActionIcon>
-                  </Tooltip>
-                </Group>
-                <Text size="xs" c="dimmed">{t('profile.partnerLinkDescription')}</Text>
-              </div>
-            </Group>
+            <Paper
+              radius="md"
+              p="md"
+              style={{
+                backgroundColor: colorScheme === 'dark' ? 'rgba(64, 192, 87, 0.08)' : '#ebfbee',
+                border: `1px solid ${colorScheme === 'dark' ? 'rgba(64, 192, 87, 0.35)' : '#b2f2bb'}`,
+              }}
+            >
+              <Group gap="xs" wrap="nowrap" mb={4}>
+                <IconGift size={22} color="#37b24d" style={{ flexShrink: 0 }} />
+                <Text fw={600} size="sm">{t('profile.partnerShareTitle')}</Text>
+              </Group>
+              <Text size="xs" c="dimmed" mb="sm">{t('profile.partnerLinkDescription')}</Text>
+              <Button
+                fullWidth
+                color="teal"
+                leftSection={clipboardLink.copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
+                onClick={() => clipboardLink.copy(partnerLink)}
+              >
+                {clipboardLink.copied ? t('common.copied') : t('profile.copyLink')}
+              </Button>
+            </Paper>
 
             <Divider my="md" />
 

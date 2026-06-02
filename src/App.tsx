@@ -35,6 +35,7 @@ function isPdf(value: string) {
 
 function LegalLinks() {
   const { t } = useTranslation();
+  const user = useStore((s) => s.user);
   const [docUrl, setDocUrl] = useState<string | null>(null);
   const [docTitle, setDocTitle] = useState('');
 
@@ -53,7 +54,7 @@ function LegalLinks() {
   const hasContacts = contactLinks.length > 0;
   const hasLegal = legalLinks.length > 0;
 
-  if (!hasLegal && !hasContacts) return null;
+  if (!hasLegal && !hasContacts && !user) return null;
 
   return (
     <>
@@ -64,6 +65,12 @@ function LegalLinks() {
         title={docTitle}
       />
       <Stack gap={0}>
+        {user && (
+          <Group justify="center" gap={6} py="xs">
+            <Text size="xs" c="dimmed">{t('profile.balance')}:</Text>
+            <Text size="xs" fw={600} c="cyan">{user.balance ?? '0.00'} {t('common.currency')}</Text>
+          </Group>
+        )}
         {hasLegal && (
           <Group justify="center" gap="md" wrap="wrap" py="sm">
             {legalLinks.map((link) =>
@@ -168,7 +175,7 @@ function ThemeToggle() {
 
 function WebAppHeader() {
   const navigate = useNavigate();
-  const { logout } = useStore();
+  const { logout, user } = useStore();
   const computedColorScheme = useComputedColorScheme('light');
   const { setColorScheme } = useMantineColorScheme();
 
@@ -193,7 +200,13 @@ function WebAppHeader() {
   };
 
   return (
-    <Group justify="flex-end" p="sm" gap="xs">
+    <Group justify="flex-end" p="sm" gap="xs" wrap="nowrap">
+      {user && (
+        <Group gap={6} wrap="nowrap" mr="auto" style={{ minWidth: 0 }}>
+          <Text size="sm" fw={600} truncate>{user.login}</Text>
+          <Text size="xs" c="dimmed" style={{ whiteSpace: 'nowrap' }}>ID {user.user_id}</Text>
+        </Group>
+      )}
      { config.SUPPORT_LINK &&  <ActionIcon
         onClick={handleSupportLink}
         variant="subtle"
@@ -311,7 +324,7 @@ function BottomNavigation({ onPayments, onWithdrawals }: { onPayments: () => voi
 function AppContent() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading, setUser, setIsLoading, logout, hasNewTicketMessages, userEmail, isEmailLoaded, setOpenEmailModal } = useStore();
+  const { user, isAuthenticated, isLoading, setUser, setIsLoading, logout, hasNewTicketMessages, userEmail, isEmailLoaded, setOpenEmailModal } = useStore();
   const emailBlocked = config.EMAIL_REQUIRED === 'true' && isEmailLoaded && !userEmail;
   const isMobile = useMediaQuery('(max-width: 768px)');
   const { t } = useTranslation();
@@ -631,7 +644,10 @@ function AppContent() {
                 );
               })}
             </Group>
-            <Group>
+            <Group wrap="nowrap">
+              {user && (
+                <Text size="sm" c="dimmed" visibleFrom="md" style={{ whiteSpace: 'nowrap' }}>{user.login} · ID {user.user_id}</Text>
+              )}
               { config.SUPPORT_LINK &&  <ActionIcon
                 onClick={handleSupportLink}
                 variant="subtle"

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Stack, Title, Tabs, Text, Center, Loader, Paper, Pagination, LoadingOverlay, ScrollArea, Group, Button, Divider, Collapse, SimpleGrid } from '@mantine/core';
+import { Stack, Title, Tabs, Text, Center, Loader, Paper, Pagination, LoadingOverlay, ScrollArea, Group, Button, Divider, Collapse, SimpleGrid, SegmentedControl } from '@mantine/core';
 import { IconCreditCard, IconReceipt, IconGift, IconChevronDown, IconChevronUp } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { userApi } from '../api/client';
@@ -84,6 +84,40 @@ export default function Finance() {
   };
   useEffect(() => { loadForecast(); }, []);
 
+  // --- Фильтр по периоду (платежи/списания): пресеты, без date-picker ---
+  const [period, setPeriod] = useState<'month' | '3m' | '6m' | '12m' | 'all'>('month');
+  const [paySum, setPaySum] = useState(0);
+  const [wdSum, setWdSum] = useState(0);
+  const periodStart = (p: string): string | null => {
+    if (p === 'all') return null;
+    const d = new Date();
+    if (p === 'month') return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
+    d.setMonth(d.getMonth() - (p === '3m' ? 3 : p === '6m' ? 6 : 12));
+    return d.toISOString().slice(0, 10);
+  };
+  const payFilter = () => {
+    const s = periodStart(period);
+    return { money: { '>': 0 }, ...(s ? { date: { '>=': s } } : {}) };
+  };
+  const wdFilter = () => {
+    const s = periodStart(period);
+    return { total: { '!=': 0 }, ...(s ? { withdraw_date: { '>=': s } } : {}) };
+  };
+  const loadPaySum = async () => {
+    try {
+      const r = await userApi.getPayments({ limit: 1000, filter: payFilter() });
+      const rows: Payment[] = r.data.data || [];
+      setPaySum(Math.round(rows.reduce((acc, p) => acc + (Number(p.money) || 0), 0) * 100) / 100);
+    } catch { /* ignore */ }
+  };
+  const loadWdSum = async () => {
+    try {
+      const r = await userApi.getWithdrawals({ limit: 1000, filter: wdFilter() });
+      const rows: Withdraw[] = r.data.data || [];
+      setWdSum(Math.round(rows.reduce((acc, w) => acc + Math.abs(Number(w.total) || 0), 0) * 100) / 100);
+    } catch { /* ignore */ }
+  };
+
   // --- Платежи ---
   const [payments, setPayments] = useState<Payment[]>([]);
   const [payLoaded, setPayLoaded] = useState(false);
@@ -99,7 +133,7 @@ export default function Finance() {
         limit: PER_PAGE,
         offset: (p - 1) * PER_PAGE,
         ...(field ? { sort_field: field, sort_direction: dir || 'asc' } : {}),
-        filter: { money: { '>': 0 } },
+        filter: payFilter(),
       });
       setPayments(response.data.data || []);
       if (typeof response.data.items === 'number') setPayTotal(response.data.items);
@@ -111,13 +145,13 @@ export default function Finance() {
   };
 
   useEffect(() => {
-    if (tab === 'payments' && !payLoaded) fetchPayments(1);
+    if (tab === 'payments' && !payLoaded) { fetchPayments(1); loadPaySum(); }
   }, [tab, payLoaded]);
 
   useEffect(() => {
-    if (payLoaded) fetchPayments(payPage, paySort.field, paySort.dir);
+    if (payLoaded) { fetchPayments(payPage, paySort.field, paySort.dir); loadPaySum(); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [payPage, paySort.field, paySort.dir]);
+  }, [payPage, paySort.field, paySort.dir, period]);
 
   const payColumns: Column<Payment>[] = [
     {
@@ -155,7 +189,7 @@ export default function Finance() {
         limit: PER_PAGE,
         offset: (p - 1) * PER_PAGE,
         ...(field ? { sort_field: field, sort_direction: dir || 'asc' } : {}),
-        filter: { total: { '!=': 0 } },
+        filter: wdFilter(),
       });
       setWithdrawals(response.data.data || []);
       if (typeof response.data.items === 'number') setWdTotal(response.data.items);
@@ -167,13 +201,13 @@ export default function Finance() {
   };
 
   useEffect(() => {
-    if (tab === 'withdrawals' && !wdLoaded) fetchWithdrawals(1);
+    if (tab === 'withdrawals' && !wdLoaded) { fetchWithdrawals(1); loadWdSum(); }
   }, [tab, wdLoaded]);
 
   useEffect(() => {
-    if (wdLoaded) fetchWithdrawals(wdPage, wdSort.field, wdSort.dir);
+    if (wdLoaded) { fetchWithdrawals(wdPage, wdSort.field, wdSort.dir); loadWdSum(); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wdPage, wdSort.field, wdSort.dir]);
+  }, [wdPage, wdSort.field, wdSort.dir, period]);
 
   const wdColumns: Column<Withdraw>[] = [
     {
@@ -242,6 +276,15 @@ export default function Finance() {
       <Text size="sm">{value} {currency}</Text>
     </Group>
   );
+
+  const periodData = [
+    { label: t('finance.periodMonth', 'Месяц'), value: 'month' },
+    { label: t('finance.period3m', '3 мес'), value: '3m' },
+    { label: t('finance.period6m', '6 мес'), value: '6m' },
+    { label: t('finance.period12m', '12 мес'), value: '12m' },
+    { label: t('finance.periodAll', 'Всё'), value: 'all' },
+  ];
+  const onPeriodChange = (v: string) => { setPeriod(v as 'month' | '3m' | '6m' | '12m' | 'all'); setPayPage(1); setWdPage(1); };
 
   return (
     <Stack gap="lg">
@@ -363,6 +406,10 @@ export default function Finance() {
         </Tabs.List>
 
         <Tabs.Panel value="payments" pt="md">
+          <Group justify="space-between" mb="md" wrap="wrap" gap="sm">
+            <SegmentedControl size="xs" value={period} onChange={onPeriodChange} data={periodData} />
+            <Text size="sm">{t('finance.toppedUp', 'Пополнено')}: <Text span fw={700} c="green">{paySum} {currency}</Text></Text>
+          </Group>
           {!payLoaded ? (
             <Center h={160}><Loader size="lg" /></Center>
           ) : payments.length === 0 ? (
@@ -387,6 +434,10 @@ export default function Finance() {
         </Tabs.Panel>
 
         <Tabs.Panel value="withdrawals" pt="md">
+          <Group justify="space-between" mb="md" wrap="wrap" gap="sm">
+            <SegmentedControl size="xs" value={period} onChange={onPeriodChange} data={periodData} />
+            <Text size="sm">{t('finance.spent', 'Списано')}: <Text span fw={700} c="red">{wdSum} {currency}</Text></Text>
+          </Group>
           {!wdLoaded ? (
             <Center h={160}><Loader size="lg" /></Center>
           ) : withdrawals.length === 0 ? (

@@ -5,7 +5,7 @@ import { MantineProvider, createTheme, AppShell, Group, Text, ActionIcon, useMan
 import { Notifications } from '@mantine/notifications';
 import { useMediaQuery, useHotkeys, useLongPress } from '@mantine/hooks';
 import { BrowserRouter, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
-import { IconSun, IconMoon, IconLogout, IconHeadset } from '@tabler/icons-react';
+import { IconSun, IconMoon, IconLogout, IconHeadset, IconWallet, IconGift } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { useStore } from './store/useStore';
 import { NAV_ITEMS } from './constants/navigation';
@@ -203,12 +203,12 @@ function WebAppHeader() {
   return (
     <Group justify="flex-end" p="sm" gap="xs" wrap="nowrap">
       {user && (
-        <Group gap="xs" wrap="wrap" style={{ flex: 1, minWidth: 0, rowGap: 2 }}>
-          <Text size="xs"><Text span c="dimmed">{t('profile.login')}:</Text> {user.login}</Text>
-          <Text size="xs"><Text span c="dimmed">{t('profile.id')}:</Text> {user.user_id}</Text>
-          <Text size="xs"><Text span c="dimmed">{t('profile.balance')}:</Text> <Text span fw={700} c="cyan">{user.balance ?? '0.00'} {t('common.currency')}</Text></Text>
+        <Group gap="sm" wrap="wrap" style={{ flex: 1, minWidth: 0, rowGap: 2 }}>
+          <Text size="xs" fw={600}>{user.login}</Text>
+          <Text size="xs" c="dimmed">ID: {user.user_id}</Text>
+          <Group gap={3} wrap="nowrap"><IconWallet size={14} color="#22b8cf" /><Text size="xs" fw={700} c="cyan">{user.balance ?? '0.00'} {t('common.currency')}</Text></Group>
           {user.bonus > 0 && (
-            <Text size="xs"><Text span c="dimmed">{t('profile.bonus')}:</Text> {user.bonus} {t('common.currency')}</Text>
+            <Group gap={3} wrap="nowrap"><IconGift size={14} color="#37b24d" /><Text size="xs">{user.bonus} {t('common.currency')}</Text></Group>
           )}
         </Group>
       )}
@@ -651,11 +651,11 @@ function AppContent() {
             </Group>
             <Group wrap="nowrap">
               {user && (
-                <Group gap="md" wrap="nowrap" visibleFrom="md">
-                  <Text size="sm"><Text span c="dimmed">{t('profile.login')}:</Text> {user.login}</Text>
-                  <Text size="sm"><Text span c="dimmed">{t('profile.id')}:</Text> {user.user_id}</Text>
-                  <Text size="sm"><Text span c="dimmed">{t('profile.balance')}:</Text> <Text span fw={600} c="cyan">{user.balance ?? '0.00'} {t('common.currency')}</Text></Text>
-                  {user.bonus > 0 && <Text size="sm"><Text span c="dimmed">{t('profile.bonus')}:</Text> {user.bonus} {t('common.currency')}</Text>}
+                <Group gap="sm" wrap="nowrap" visibleFrom="md">
+                  <Text size="sm" fw={600}>{user.login}</Text>
+                  <Text size="sm" c="dimmed">ID: {user.user_id}</Text>
+                  <Group gap={3} wrap="nowrap"><IconWallet size={15} color="#22b8cf" /><Text size="sm" fw={600} c="cyan">{user.balance ?? '0.00'} {t('common.currency')}</Text></Group>
+                  {user.bonus > 0 && <Group gap={3} wrap="nowrap"><IconGift size={15} color="#37b24d" /><Text size="sm">{user.bonus} {t('common.currency')}</Text></Group>}
                 </Group>
               )}
               { config.SUPPORT_LINK &&  <ActionIcon

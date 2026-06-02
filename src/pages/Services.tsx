@@ -725,11 +725,24 @@ function ServiceDetail({ service, onDelete, onChangeTariff }: ServiceDetailProps
   );
 }
 
-function ServiceCard({ service, onClick, isChild = false, isLastChild = false, cost }: { service: UserService; onClick: () => void; isChild?: boolean; isLastChild?: boolean; cost?: number }) {
+function ServiceCard({ service, onClick, isChild = false, isLastChild = false, cost, discount = 0 }: { service: UserService; onClick: () => void; isChild?: boolean; isLastChild?: boolean; cost?: number; discount?: number }) {
   const { t, i18n } = useTranslation();
   const statusColor = statusColors[service.status] || 'gray';
   const statusLabel = t(`status.${service.status}`, service.status);
   const displayCost = (cost ?? service.service.cost) || 0;
+  // #3: для VPN Подписки (proxy) показываем цену со скидкой юзера, исходную — зачёркнутой
+  const isProxy = normalizeCategory(service.service.category) === 'proxy';
+  const discounted = isProxy && discount > 0 ? Math.round(displayCost * (1 - discount / 100)) : 0;
+  const costNode = displayCost > 0 ? (
+    discounted > 0 && discounted < displayCost ? (
+      <Group gap={6} align="baseline" wrap="nowrap">
+        <Text size="sm" c="dimmed" td="line-through">{displayCost}</Text>
+        <Text size="sm" fw={600} c="green">{discounted} {t('common.currency')}</Text>
+      </Group>
+    ) : (
+      <Text size="sm" c="dimmed">{displayCost} {t('common.currency')}</Text>
+    )
+  ) : null;
 
   if (isChild) {
     return (
@@ -779,9 +792,7 @@ function ServiceCard({ service, onClick, isChild = false, isLastChild = false, c
               )}
             </div>
             <Group gap="sm">
-              {displayCost > 0 && (
-                <Text size="sm" c="dimmed">{displayCost} {t('common.currency')}</Text>
-              )}
+              {costNode}
               <Badge color={statusColor} variant="light" size="sm">
                 {statusLabel}
               </Badge>
@@ -810,9 +821,7 @@ function ServiceCard({ service, onClick, isChild = false, isLastChild = false, c
           )}
         </div>
         <Group gap="sm">
-          {displayCost > 0 && (
-            <Text size="sm" c="dimmed">{displayCost} {t('common.currency')}</Text>
-          )}
+          {costNode}
           <Badge color={statusColor} variant="light">
             {statusLabel}
           </Badge>
@@ -835,7 +844,7 @@ export default function Services() {
   const [categoryPages, setCategoryPages] = useState<Record<string, number>>({});
   const perPage = 5;
   const { t } = useTranslation();
-  const { userEmailVerified, setOpenVerifyModal, userEmail: storeEmail, isEmailLoaded, setOpenEmailModal } = useStore();
+  const { user, userEmailVerified, setOpenVerifyModal, userEmail: storeEmail, isEmailLoaded, setOpenEmailModal } = useStore();
   const emailBlocked = config.EMAIL_REQUIRED === 'true' && isEmailLoaded && !storeEmail;
   const [confirmEmailNotVerified, setConfirmEmailNotVerified] = useState(false);
   const navigate = useNavigate();
@@ -1055,6 +1064,7 @@ export default function Services() {
                         service={service}
                         onClick={() => handleServiceClick(service)}
                         cost={costMap[String(service.user_service_id)]}
+                        discount={user?.discount ?? 0}
                       />
                       {service.children && service.children.length > 0 && (
                         <Stack gap="xs" mt="xs" ml="md">
@@ -1066,6 +1076,7 @@ export default function Services() {
                               isChild
                               isLastChild={index === service.children!.length - 1}
                               cost={costMap[String(child.user_service_id)]}
+                              discount={user?.discount ?? 0}
                             />
                           ))}
                         </Stack>

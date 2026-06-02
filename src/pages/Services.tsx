@@ -725,10 +725,11 @@ function ServiceDetail({ service, onDelete, onChangeTariff }: ServiceDetailProps
   );
 }
 
-function ServiceCard({ service, onClick, isChild = false, isLastChild = false }: { service: UserService; onClick: () => void; isChild?: boolean; isLastChild?: boolean }) {
+function ServiceCard({ service, onClick, isChild = false, isLastChild = false, cost }: { service: UserService; onClick: () => void; isChild?: boolean; isLastChild?: boolean; cost?: number }) {
   const { t, i18n } = useTranslation();
   const statusColor = statusColors[service.status] || 'gray';
   const statusLabel = t(`status.${service.status}`, service.status);
+  const displayCost = (cost ?? service.service.cost) || 0;
 
   if (isChild) {
     return (
@@ -778,8 +779,8 @@ function ServiceCard({ service, onClick, isChild = false, isLastChild = false }:
               )}
             </div>
             <Group gap="sm">
-              {service.service.cost > 0 && (
-                <Text size="sm" c="dimmed">{service.service.cost} {t('common.currency')}</Text>
+              {displayCost > 0 && (
+                <Text size="sm" c="dimmed">{displayCost} {t('common.currency')}</Text>
               )}
               <Badge color={statusColor} variant="light" size="sm">
                 {statusLabel}
@@ -809,8 +810,8 @@ function ServiceCard({ service, onClick, isChild = false, isLastChild = false }:
           )}
         </div>
         <Group gap="sm">
-          {service.service.cost > 0 && (
-            <Text size="sm" c="dimmed">{service.service.cost} {t('common.currency')}</Text>
+          {displayCost > 0 && (
+            <Text size="sm" c="dimmed">{displayCost} {t('common.currency')}</Text>
           )}
           <Badge color={statusColor} variant="light">
             {statusLabel}
@@ -823,6 +824,7 @@ function ServiceCard({ service, onClick, isChild = false, isLastChild = false }:
 
 export default function Services() {
   const [services, setServices] = useState<UserService[]>([]);
+  const [costMap, setCostMap] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [selectedService, setSelectedService] = useState<UserService | null>(null);
   const [opened, { open, close }] = useDisclosure(false);
@@ -899,6 +901,24 @@ export default function Services() {
 
   useEffect(() => {
     fetchServices();
+  }, []);
+
+  useEffect(() => {
+    // Карта индивидуальных цен (usi -> cost) из последних списаний — для отображения в карточках списка
+    const buildCostMap = async () => {
+      try {
+        const response = await userApi.getWithdrawals({ limit: 500, sort_field: 'withdraw_date', sort_direction: 'desc' });
+        const rows: { user_service_id: number; cost: number }[] = response.data.data || [];
+        const map: Record<string, number> = {};
+        for (const w of rows) {
+          const k = String(w.user_service_id);
+          if (map[k] === undefined && typeof w.cost === 'number') map[k] = w.cost;
+        }
+        setCostMap(map);
+      } catch {
+      }
+    };
+    buildCostMap();
   }, []);
 
   useEffect(() => {
@@ -1017,6 +1037,7 @@ export default function Services() {
                       <ServiceCard
                         service={service}
                         onClick={() => handleServiceClick(service)}
+                        cost={costMap[String(service.user_service_id)]}
                       />
                       {service.children && service.children.length > 0 && (
                         <Stack gap="xs" mt="xs" ml="md">
@@ -1027,6 +1048,7 @@ export default function Services() {
                               onClick={() => handleServiceClick(child)}
                               isChild
                               isLastChild={index === service.children!.length - 1}
+                              cost={costMap[String(child.user_service_id)]}
                             />
                           ))}
                         </Stack>

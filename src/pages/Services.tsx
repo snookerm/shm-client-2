@@ -13,6 +13,7 @@ import AppDownloadBlock from '../components/AppDownloadBlock';
 import { config } from '../config';
 import { useStore } from '../store/useStore';
 import { isTelegramWebApp } from '../constants/webapp';
+import { normalizeCategory, categoryTitle as resolveCategoryTitle } from '../constants/categories';
 
 interface ForecastItem {
   name: string;
@@ -60,28 +61,7 @@ const statusColors: Record<string, string> = {
   'INIT': 'gray',
 };
 
-function normalizeCategory(category: string): string {
-  const proxyCategories = new Set(config.PROXY_CATEGORY.split(','));
-  const vpnCategories = new Set(config.VPN_CATEGORY.split(','));
-
-  if (proxyCategories.has(category)) {
-    return 'proxy';
-  }
-  if (vpnCategories.has(category)) {
-    return 'vpn';
-  }
-
-  if (category.match(/remna|remnawave|marzban|marz|mz/i)) {
-    return 'proxy';
-  }
-  if (category.match(/^(vpn|wg|awg)/i)) {
-    return 'vpn';
-  }
-  if (['web_tariff', 'web', 'mysql', 'mail', 'hosting'].includes(category)) {
-    return category;
-  }
-  return 'other';
-}
+// normalizeCategory вынесена в src/constants/categories.ts (общий реестр для Services + OrderServiceModal)
 
 interface ServiceDetailProps {
   service: UserService;
@@ -276,7 +256,9 @@ function ServiceDetail({ service, onDelete, onChangeTariff }: ServiceDetailProps
 
   function detectPlatform(): string {
     const ua = navigator.userAgent;
-    if (/iPhone|iPad|iPod/i.test(ua)) return 'IOS';
+    // iPadOS 13+ Safari репортится как Macintosh — детектим iPad по тач-поинтам
+    const isIpadOS = /Macintosh|Mac OS X/i.test(ua) && navigator.maxTouchPoints > 1;
+    if (/iPhone|iPad|iPod/i.test(ua) || isIpadOS) return 'IOS';
     if (/Android/i.test(ua) && /Mobile/i.test(ua)) return 'ANDROID';
     if (/Windows NT/i.test(ua)) return 'WINDOWS';
     if (/Linux/i.test(ua)) return 'LINUX';
@@ -986,14 +968,7 @@ export default function Services() {
             const page = categoryPages[category] || 1;
             const totalPages = Math.ceil(categoryServices.length / perPage);
             const paginatedServices = categoryServices.slice((page - 1) * perPage, page * perPage);
-            let categoryTitle;
-            if ( category === 'vpn' && config.VPN_CATEGORY_TITLE ) {
-              categoryTitle = config.VPN_CATEGORY_TITLE
-            } else if ( category === 'proxy' && config.PROXY_CATEGORY_TITLE ) {
-              categoryTitle = config.PROXY_CATEGORY_TITLE
-            } else {
-              categoryTitle = t(`categories.${category}`, category);
-            }
+            const categoryTitle = resolveCategoryTitle(category, t);
             return (
             <Accordion.Item key={category} value={category}>
               <Accordion.Control>

@@ -240,6 +240,8 @@
   "categories": {
     "vpn": "VPN",
     "proxy": "VPN Подписка",
+    "mikrotik": "VPN на Mikrotik",
+    "keenetic": "VPN на роутере",
     "web_tariff": "Тарифы хостинга",
     "web": "Web хостинг",
     "mysql": "Базы данных",

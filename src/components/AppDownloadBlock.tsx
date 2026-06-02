@@ -37,7 +37,9 @@ function getIconColor(key: string) {
 
 function detectPlatform(): string {
   const ua = navigator.userAgent;
-  if (/iPhone|iPad|iPod/i.test(ua)) return 'ios';
+  // iPadOS 13+ Safari репортится как Macintosh — детектим iPad по тач-поинтам
+  const isIpadOS = /Macintosh|Mac OS X/i.test(ua) && navigator.maxTouchPoints > 1;
+  if (/iPhone|iPad|iPod/i.test(ua) || isIpadOS) return 'ios';
   if (/Android/i.test(ua) && /Mobile/i.test(ua)) return 'android';
   if (/Android/i.test(ua)) return 'androidtv';
   if (/Windows NT/i.test(ua)) return 'windows';

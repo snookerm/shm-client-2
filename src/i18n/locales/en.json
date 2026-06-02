@@ -240,6 +240,8 @@
   "categories": {
     "vpn": "VPN",
     "proxy": "VPN Subscription",
+    "mikrotik": "VPN on MikroTik",
+    "keenetic": "VPN on router",
     "web_tariff": "Hosting plans",
     "web": "Web hosting",
     "mysql": "Databases",

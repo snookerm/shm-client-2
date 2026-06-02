@@ -1,0 +1,6 @@
+# Shell-скрипты и nginx-конфиг ОБЯЗАТЕЛЬНО LF — иначе контейнер падает:
+# "exec /entry.sh: no such file or directory" (шебанг #!/bin/sh\r).
+# См. memory reference_windows_docker_crlf_entrypoint.
+*.sh text eol=lf
+entry.sh text eol=lf
+nginx.conf text eol=lf

@@ -73,6 +73,8 @@ interface AppConfig {
   ORDER_SORTING: string;
   CONTACT_EMAIL: string;
   CONTACT_PHONE: string;
+  MIKROTIK_CATEGORY_TITLE: string;
+  KEENETIC_CATEGORY_TITLE: string;
 }
 
 declare global {
@@ -159,6 +161,8 @@ function getConfig(): AppConfig {
     CAPTCHA_ENABLED: runtimeConfig?.CAPTCHA_ENABLED || import.meta.env.VITE_CAPTCHA_ENABLED || 'false',
     CONTACT_EMAIL: runtimeConfig?.CONTACT_EMAIL || import.meta.env.VITE_CONTACT_EMAIL || '',
     CONTACT_PHONE: runtimeConfig?.CONTACT_PHONE || import.meta.env.VITE_CONTACT_PHONE || '',
+    MIKROTIK_CATEGORY_TITLE: runtimeConfig?.MIKROTIK_CATEGORY_TITLE || import.meta.env.VITE_MIKROTIK_CATEGORY_TITLE || '',
+    KEENETIC_CATEGORY_TITLE: runtimeConfig?.KEENETIC_CATEGORY_TITLE || import.meta.env.VITE_KEENETIC_CATEGORY_TITLE || '',
   };
 }
 

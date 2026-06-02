@@ -5,6 +5,7 @@ import { IconArrowLeft, IconCreditCard, IconCheck, IconWallet } from '@tabler/ic
 import { servicesApi, userApi } from '../api/client';
 import { notifications } from '@mantine/notifications';
 import { config } from '../config';
+import { normalizeCategory, categoryTitle as resolveCategoryTitle } from '../constants/categories';
 
 interface OrderService {
   service_id: number;
@@ -40,18 +41,7 @@ interface OrderServiceModalProps {
   onChangeSuccess?: () => void;
 }
 
-function normalizeCategory(category: string): string {
-  if (category.match(/remna|remnawave|marzban|marz|mz/i)) {
-    return 'proxy';
-  }
-  if (category.match(/^(vpn|wg|awg)/i)) {
-    return 'vpn';
-  }
-  if (['web_tariff', 'web', 'mysql', 'mail', 'hosting'].includes(category)) {
-    return category;
-  }
-  return 'other';
-}
+// normalizeCategory вынесена в src/constants/categories.ts (общий реестр)
 
 function formatPeriod(value: number, t: any) {
   if (!value) return '-';
@@ -330,14 +320,7 @@ export default function OrderServiceModal({
   const groupedServices = services.reduce((acc, service) => {
     const category = normalizeCategory(service.category || 'other');
 
-    let categoryTitle;
-    if (category === 'vpn' && config.VPN_CATEGORY_TITLE) {
-      categoryTitle = config.VPN_CATEGORY_TITLE;
-    } else if (category === 'proxy' && config.PROXY_CATEGORY_TITLE) {
-      categoryTitle = config.PROXY_CATEGORY_TITLE;
-    } else {
-      categoryTitle = t(`categories.${category}`, category);
-    }
+    const categoryTitle = resolveCategoryTitle(category, t);
     if (config.VISIBLE_CATEGORIES) {
       const visibleCategories = config.VISIBLE_CATEGORIES.split(',').map(c => c.trim().toLowerCase());
       const rawCategory = (service.category || 'other').toLowerCase();

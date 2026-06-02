@@ -13,7 +13,7 @@ import AppDownloadBlock from '../components/AppDownloadBlock';
 import { config } from '../config';
 import { useStore } from '../store/useStore';
 import { isTelegramWebApp } from '../constants/webapp';
-import { normalizeCategory, categoryTitle as resolveCategoryTitle } from '../constants/categories';
+import { normalizeCategory, categoryTitle as resolveCategoryTitle, sortCategoryKeys } from '../constants/categories';
 
 interface ForecastItem {
   name: string;
@@ -924,6 +924,8 @@ export default function Services() {
     return acc;
   }, {} as Record<string, UserService[]>);
 
+  const sortedCategories = sortCategoryKeys(Object.keys(groupedServices));
+
   if (loading) {
     return (
       <Center h={300}>
@@ -963,8 +965,9 @@ export default function Services() {
           </Center>
         </Paper>
       ) : (
-        <Accordion variant="separated" radius="md" multiple defaultValue={Object.keys(groupedServices)}>
-          {Object.entries(groupedServices).map(([category, categoryServices]) => {
+        <Accordion variant="separated" radius="md" multiple defaultValue={sortedCategories.slice(0, 1)}>
+          {sortedCategories.map((category) => {
+            const categoryServices = groupedServices[category];
             const page = categoryPages[category] || 1;
             const totalPages = Math.ceil(categoryServices.length / perPage);
             const paginatedServices = categoryServices.slice((page - 1) * perPage, page * perPage);

@@ -45,3 +45,15 @@ export function categoryTitle(normalized: string, t: any): string {
       return t(`categories.${normalized}`, normalized);
   }
 }
+
+/** Порядок отображения групп категорий (proxy=«VPN Подписка» первой). Неизвестные — в конце. */
+export const CATEGORY_ORDER = ['proxy', 'vpn', 'keenetic', 'mikrotik', 'web_tariff', 'web', 'mysql', 'mail', 'hosting', 'other'];
+
+/** Сортирует ключи категорий по CATEGORY_ORDER (неизвестные — в конец, стабильно). */
+export function sortCategoryKeys(keys: string[]): string[] {
+  const rank = (k: string) => {
+    const i = CATEGORY_ORDER.indexOf(k);
+    return i === -1 ? CATEGORY_ORDER.length : i;
+  };
+  return [...keys].sort((a, b) => rank(a) - rank(b));
+}

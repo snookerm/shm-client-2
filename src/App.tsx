@@ -176,6 +176,7 @@ function ThemeToggle() {
 function WebAppHeader() {
   const navigate = useNavigate();
   const { logout, user } = useStore();
+  const { t } = useTranslation();
   const computedColorScheme = useComputedColorScheme('light');
   const { setColorScheme } = useMantineColorScheme();
 
@@ -202,9 +203,13 @@ function WebAppHeader() {
   return (
     <Group justify="flex-end" p="sm" gap="xs" wrap="nowrap">
       {user && (
-        <Group gap={6} wrap="nowrap" mr="auto" style={{ minWidth: 0 }}>
-          <Text size="sm" fw={600} truncate>{user.login}</Text>
-          <Text size="xs" c="dimmed" style={{ whiteSpace: 'nowrap' }}>ID {user.user_id}</Text>
+        <Group gap="xs" wrap="wrap" style={{ flex: 1, minWidth: 0, rowGap: 2 }}>
+          <Text size="xs"><Text span c="dimmed">{t('profile.login')}:</Text> {user.login}</Text>
+          <Text size="xs"><Text span c="dimmed">{t('profile.id')}:</Text> {user.user_id}</Text>
+          <Text size="xs"><Text span c="dimmed">{t('profile.balance')}:</Text> <Text span fw={700} c="cyan">{user.balance ?? '0.00'} {t('common.currency')}</Text></Text>
+          {user.bonus > 0 && (
+            <Text size="xs"><Text span c="dimmed">{t('profile.bonus')}:</Text> {user.bonus} {t('common.currency')}</Text>
+          )}
         </Group>
       )}
      { config.SUPPORT_LINK &&  <ActionIcon
@@ -646,7 +651,12 @@ function AppContent() {
             </Group>
             <Group wrap="nowrap">
               {user && (
-                <Text size="sm" c="dimmed" visibleFrom="md" style={{ whiteSpace: 'nowrap' }}>{user.login} · ID {user.user_id}</Text>
+                <Group gap="md" wrap="nowrap" visibleFrom="md">
+                  <Text size="sm"><Text span c="dimmed">{t('profile.login')}:</Text> {user.login}</Text>
+                  <Text size="sm"><Text span c="dimmed">{t('profile.id')}:</Text> {user.user_id}</Text>
+                  <Text size="sm"><Text span c="dimmed">{t('profile.balance')}:</Text> <Text span fw={600} c="cyan">{user.balance ?? '0.00'} {t('common.currency')}</Text></Text>
+                  {user.bonus > 0 && <Text size="sm"><Text span c="dimmed">{t('profile.bonus')}:</Text> {user.bonus} {t('common.currency')}</Text>}
+                </Group>
               )}
               { config.SUPPORT_LINK &&  <ActionIcon
                 onClick={handleSupportLink}

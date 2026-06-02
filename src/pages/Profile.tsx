@@ -1,13 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Card, Text, Stack, Group, Divider, Grid, Button, TextInput, ActionIcon, Avatar, Title, Modal, Loader, Center, Collapse, Alert, Skeleton, Paper, useMantineColorScheme } from '@mantine/core';
-import { IconUser, IconPhone, IconCopy, IconCheck, IconBrandTelegram, IconCreditCard, IconChevronDown, IconChevronUp, IconMail, IconAlertCircle, IconGift } from '@tabler/icons-react';
+import { Card, Text, Stack, Group, Divider, Grid, Button, TextInput, ActionIcon, Avatar, Title, Modal, Loader, Center, Alert, Skeleton, Paper, useMantineColorScheme } from '@mantine/core';
+import { IconUser, IconPhone, IconCopy, IconCheck, IconBrandTelegram, IconMail, IconAlertCircle, IconGift } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { useClipboard } from '@mantine/hooks';
 import { useTranslation } from 'react-i18next';
 import { userApi, telegramApi, userEmailApi } from '../api/client';
 import { encodePartnerIdBase64url } from '../api/cookie';
-import PayModal from '../components/PayModal';
-import PromoModal from '../components/PromoModal';
 import SecuritySettings from '../components/security/SecuritySettings';
 import { useStore } from '../store/useStore';
 import { config } from '../config';
@@ -29,42 +27,8 @@ interface UserProfile {
   gid: number;
 }
 
-interface ForecastNextItem {
-  name: string;
-  cost: number;
-  total: number;
-  months: number;
-  qnt: number;
-  service_id: number;
-  bonus: number;
-  discount: number;
-}
-
-interface ForecastItem {
-  name: string;
-  cost: number;
-  total: number;
-  status: string;
-  service_id: string;
-  user_service_id: string;
-  months: number;
-  discount: number;
-  qnt: number;
-  expire?: string;
-  next?: ForecastNextItem;
-}
-
-interface ForecastData {
-  balance: number;
-  bonuses: number;
-  dept: number;
-  total: number;
-  items: ForecastItem[];
-}
-
 export default function Profile() {
-  const { telegramPhoto, userEmail: storeEmail, userEmailVerified: storeEmailVerified, setUserEmail, setUserEmailVerified, isEmailLoaded, setOpenEmailModal } = useStore();
-  const emailBlocked = config.EMAIL_REQUIRED === 'true' && isEmailLoaded && !storeEmail;
+  const { telegramPhoto, userEmail: storeEmail, userEmailVerified: storeEmailVerified, setUserEmail, setUserEmailVerified } = useStore();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -72,9 +36,6 @@ export default function Profile() {
   const [telegramUsername, setTelegramUsername] = useState<string | null>(null);
   const [telegramLoading, setTelegramLoading] = useState(false);
   const [telegramWaitingOpen, setTelegramWaitingOpen] = useState(false);
-  const [payModalOpen, setPayModalOpen] = useState(false);
-  const [payModalAmount, setPayModalAmount] = useState<number | undefined>(undefined);
-  const [promoModalOpen, setPromoModalOpen] = useState(false);
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [emailInput, setEmailInput] = useState('');
   const [emailSaving, setEmailSaving] = useState(false);
@@ -94,8 +55,6 @@ export default function Profile() {
   const [verifyConfirming, setVerifyConfirming] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [unbindConfirmOpen, setUnbindConfirmOpen] = useState(false);
-  const [forecast, setForecast] = useState<ForecastData | null>(null);
-  const [forecastOpen, setForecastOpen] = useState(false);
   const { colorScheme } = useMantineColorScheme();
   const clipboardId = useClipboard({ timeout: 1000 });
   const clipboardLink = useClipboard({ timeout: 1000 });
@@ -146,14 +105,6 @@ export default function Profile() {
           phone: data.phone || '',
           login2: data.login2 || '',
         });
-        try {
-          const forecastResponse = await userApi.getForecast();
-          const forecastData = forecastResponse.data.data;
-          if (Array.isArray(forecastData) && forecastData.length > 0) {
-            setForecast(forecastData[0]);
-          }
-        } catch {
-        }
       } finally {
         setLoading(false);
       }
@@ -233,13 +184,6 @@ export default function Profile() {
         color: 'red',
       });
     }
-  };
-
-  const refreshProfile = async () => {
-    const profileResponse = await userApi.getProfile();
-    const profileData = profileResponse.data.data;
-    const data = Array.isArray(profileData) ? profileData[0] : profileData;
-    setProfile(data);
   };
 
   const handleTelegramOidcBind = async (event: any) => {
@@ -542,30 +486,6 @@ export default function Profile() {
               </Button>
             </Paper>
 
-            <Divider my="md" />
-
-            <Group justify="space-between" align="center">
-              <div>
-                <Group gap="xs" align="baseline">
-                  {t('profile.balance')}: <Text c="cyan" size="xl" fw={700}>{profile.balance || '0.00'} {t('common.currency')}</Text>
-                </Group>
-              </div>
-              <Button leftSection={<IconCreditCard size={18} />} color="cyan" onClick={() => emailBlocked ? setOpenEmailModal(true) : (setPayModalAmount(forecast?.total ?? undefined), setPayModalOpen(true))}>
-                {t('profile.topUp')}
-              </Button>
-            </Group>
-
-            <Divider my="md" />
-
-            <Group justify="space-between" align="center">
-              <div>
-                  <Text size="xm" c="dimmed">{t('profile.bonus')}: {profile.bonus}</Text>
-              </div>
-              <Button onClick={() => emailBlocked ? setOpenEmailModal(true) : setPromoModalOpen(true)} color="cyan">
-                {t('profile.enterPromo')}
-              </Button>
-            </Group>
-
           </Card>
 
         </Grid.Col>
@@ -663,90 +583,6 @@ export default function Profile() {
         </Grid.Col>
       </Grid>
 
-      {forecast && forecast.items && forecast.items.length > 0 && (
-        <Card withBorder radius="md" p="lg">
-          <Group
-            justify="space-between"
-            style={{ cursor: 'pointer' }}
-            onClick={() => setForecastOpen(!forecastOpen)}
-          >
-            <div>
-              <Text fw={500}>{t('profile.forecast')}</Text>
-              <Text size="sm" c={forecast.total > 0 ? 'red' : 'green'} fw={600}>
-                {t('profile.toPay')}: {forecast.total} {t('common.currency')}
-              </Text>
-            </div>
-            {forecastOpen ? <IconChevronUp size={20} /> : <IconChevronDown size={20} />}
-          </Group>
-          <Collapse in={forecastOpen}>
-            <Stack gap="sm" mt="md">
-              {forecast.items.map((item, index) => (
-                <Card
-                  key={index}
-                  withBorder
-                  radius="sm"
-                  p="sm"
-                  bg={item.status === 'NOT PAID'
-                    ? (colorScheme === 'dark' ? 'rgba(239, 68, 68, 0.15)' : 'red.0')
-                    : undefined
-                  }
-                >
-                  <Stack gap={4}>
-                    <Group justify="space-between" wrap="nowrap">
-                      <div style={{ flex: 1 }}>
-                        <Text size="sm" fw={500}>{item.name}</Text>
-                        { item.qnt > 1 && (
-                          <Text size="xs" c="dimmed">
-                            {item.months} {t('common.months')} × {item.qnt} {t('common.pieces')}
-                          </Text>
-                        )}
-                      </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <Text size="sm" c="dimmed">
-                          {item.total} {t('common.currency')}
-                        </Text>
-                        <Text size="xs" c={item.status === 'NOT PAID' ? 'red' : 'green'}>
-                          {t(`status.${item.status}`)}
-                        </Text>
-                      </div>
-                    </Group>
-                    {item.next && (
-                      <Group justify="space-between" wrap="nowrap" pt={4} style={{ borderTop: '1px dashed var(--mantine-color-default-border)' }}>
-                        <div style={{ flex: 1 }}>
-                          <Text size="xs" c="dimmed">{t('profile.nextRenewal')}:</Text>
-                          <Text size="sm" fw={500}>{item.next.name}</Text>
-                          { item.next.qnt > 1 && (
-                            <Text size="xs" c="dimmed">
-                              {item.next.months} {t('common.months')} × {item.next.qnt} {t('common.pieces')}
-                            </Text>
-                          )}
-                        </div>
-                        <div style={{ textAlign: 'right' }}>
-                          <Text size="sm" fw={700} c="red">
-                            {item.next.total} {t('common.currency')}
-                          </Text>
-                        </div>
-                      </Group>
-                    )}
-                  </Stack>
-                </Card>
-              ))}
-              {forecast.dept > 0 && (
-                <Card withBorder radius="sm" p="sm" bg={colorScheme === 'dark' ? 'rgba(239, 68, 68, 0.15)' : 'red.0'}>
-                  <Group justify="space-between" wrap="nowrap">
-                    <Text size="sm" fw={500} c="red">{t('profile.debt')}</Text>
-                    <Text size="sm" fw={700} c="red">{forecast.dept} {t('common.currency')}</Text>
-                  </Group>
-                </Card>
-              )}
-              <Button leftSection={<IconCreditCard size={18} />} onClick={() => emailBlocked ? setOpenEmailModal(true) : (setPayModalAmount(forecast?.total ?? undefined), setPayModalOpen(true))}>
-                {t('profile.toPay')} {forecast.total} {t('common.currency')}
-              </Button>
-            </Stack>
-          </Collapse>
-        </Card>
-      )}
-
       {(config.ALLOW_TELEGRAM_PIN === 'true' || hasTelegramWidget) && (
         <Card withBorder radius="md" p="lg">
           <Group justify="space-between" mb="md">
@@ -787,14 +623,6 @@ export default function Profile() {
       )}
 
       <SecuritySettings />
-
-      <PayModal opened={payModalOpen} onClose={() => setPayModalOpen(false)} initialAmount={payModalAmount} />
-
-      <PromoModal
-        opened={promoModalOpen}
-        onClose={() => setPromoModalOpen(false)}
-        onSuccess={refreshProfile}
-      />
 
       <Modal
         opened={telegramWaitingOpen}

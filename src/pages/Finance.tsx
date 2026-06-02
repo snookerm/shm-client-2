@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Stack, Title, Tabs, Text, Center, Loader, Paper, Pagination, LoadingOverlay, ScrollArea, Group, Button, Divider } from '@mantine/core';
-import { IconCreditCard, IconReceipt, IconGift } from '@tabler/icons-react';
+import { Stack, Title, Tabs, Text, Center, Loader, Paper, Pagination, LoadingOverlay, ScrollArea, Group, Button, Divider, Collapse } from '@mantine/core';
+import { IconCreditCard, IconReceipt, IconGift, IconChevronDown, IconChevronUp } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { userApi } from '../api/client';
 import DataTable, { Column } from '../components/DataTable';
 import { useStore } from '../store/useStore';
 import PayModal from '../components/PayModal';
+import PromoModal from '../components/PromoModal';
 
 interface Payment {
   id: number;
@@ -25,16 +26,20 @@ interface Withdraw {
   end_date: string;
 }
 
-interface ForecastNextItem { total: number; }
+interface ForecastNextItem { name: string; cost: number; total: number; months: number; qnt: number; }
 interface ForecastItem {
   name: string;
+  cost: number;
   total: number;
   status: string;
+  months: number;
+  qnt: number;
   expire?: string;
   next?: ForecastNextItem;
 }
 interface ForecastData {
   balance: number;
+  bonuses: number;
   dept: number;
   total: number;
   items: ForecastItem[];
@@ -60,21 +65,24 @@ export default function Finance() {
   const user = useStore((s) => s.user);
   const [tab, setTab] = useState<string | null>('payments');
 
-  // --- Топ-блок: баланс + сумма к оплате (forecast: активные/блок/неоплаченные/долг) ---
+  // --- Топ-блок + «Прогноз оплаты»: forecast days=3 («срочное», как в спул-уведомлениях) ---
   const [forecast, setForecast] = useState<ForecastData | null>(null);
+  const [forecastOpen, setForecastOpen] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
   const [payAmount, setPayAmount] = useState<number | undefined>(undefined);
+  const [promoOpen, setPromoOpen] = useState(false);
 
-  useEffect(() => {
+  const loadForecast = () => {
     userApi
-      .getForecast({ days: 30, blocked: 1 })
+      .getForecast({ days: 3, blocked: 1 })
       .then((r) => {
         const d = r.data.data;
         if (Array.isArray(d) && d.length) setForecast(d[0]);
         else if (d && !Array.isArray(d)) setForecast(d);
       })
       .catch(() => {});
-  }, []);
+  };
+  useEffect(() => { loadForecast(); }, []);
 
   // --- Платежи ---
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -224,6 +232,7 @@ export default function Finance() {
   const debt = forecast?.dept || 0;
   const toPayTotal = forecast?.total ?? (debt + dueRenewal + blockedSum + notPaidSum);
   const balance = forecast?.balance ?? 0;
+  const bonus = forecast?.bonuses ?? user?.bonus ?? 0;
   const currency = t('common.currency');
   const openPay = (amount?: number) => { setPayAmount(amount); setPayOpen(true); };
 
@@ -269,6 +278,65 @@ export default function Finance() {
           </>
         )}
       </Paper>
+
+      {forecast && forecast.items && forecast.items.length > 0 && (
+        <Paper withBorder radius="md" p="lg">
+          <Group justify="space-between" style={{ cursor: 'pointer' }} onClick={() => setForecastOpen(!forecastOpen)}>
+            <div>
+              <Text fw={500}>{t('profile.forecast')}</Text>
+              <Text size="sm" c={forecast.total > 0 ? 'red' : 'green'} fw={600}>
+                {t('profile.toPay')}: {forecast.total} {currency}
+              </Text>
+            </div>
+            {forecastOpen ? <IconChevronUp size={20} /> : <IconChevronDown size={20} />}
+          </Group>
+          <Collapse in={forecastOpen}>
+            <Stack gap="sm" mt="md">
+              {forecast.items.map((item, index) => (
+                <Paper key={index} withBorder radius="sm" p="sm"
+                  style={{ backgroundColor: item.status === 'NOT PAID' ? 'var(--mantine-color-red-light)' : undefined }}>
+                  <Stack gap={4}>
+                    <Group justify="space-between" wrap="nowrap">
+                      <div style={{ flex: 1 }}>
+                        <Text size="sm" fw={500}>{item.name}</Text>
+                        {item.qnt > 1 && (
+                          <Text size="xs" c="dimmed">{item.months} {t('common.months')} × {item.qnt} {t('common.pieces')}</Text>
+                        )}
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <Text size="sm" c="dimmed">{item.total} {currency}</Text>
+                        <Text size="xs" c={item.status === 'NOT PAID' ? 'red' : 'green'}>{t(`status.${item.status}`)}</Text>
+                      </div>
+                    </Group>
+                    {item.next && (
+                      <Group justify="space-between" wrap="nowrap" pt={4} style={{ borderTop: '1px dashed var(--mantine-color-default-border)' }}>
+                        <div style={{ flex: 1 }}>
+                          <Text size="xs" c="dimmed">{t('profile.nextRenewal')}:</Text>
+                          <Text size="sm" fw={500}>{item.next.name}</Text>
+                          {item.next.qnt > 1 && (
+                            <Text size="xs" c="dimmed">{item.next.months} {t('common.months')} × {item.next.qnt} {t('common.pieces')}</Text>
+                          )}
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <Text size="sm" fw={700} c="red">{item.next.total} {currency}</Text>
+                        </div>
+                      </Group>
+                    )}
+                  </Stack>
+                </Paper>
+              ))}
+              {forecast.dept > 0 && (
+                <Paper withBorder radius="sm" p="sm" style={{ backgroundColor: 'var(--mantine-color-red-light)' }}>
+                  <Group justify="space-between" wrap="nowrap">
+                    <Text size="sm" fw={500} c="red">{t('profile.debt')}</Text>
+                    <Text size="sm" fw={700} c="red">{forecast.dept} {currency}</Text>
+                  </Group>
+                </Paper>
+              )}
+            </Stack>
+          </Collapse>
+        </Paper>
+      )}
 
       <Tabs value={tab} onChange={setTab} keepMounted={false}>
         <Tabs.List>
@@ -329,7 +397,10 @@ export default function Finance() {
           <Paper withBorder radius="md" p="lg">
             <Group justify="space-between" align="center">
               <Group gap="xs"><IconGift size={22} color="#37b24d" /><Text fw={500}>{t('profile.bonus')}</Text></Group>
-              <Text size="xl" fw={700} c="teal">{user?.bonus ?? 0} {t('common.currency')}</Text>
+              <Text size="xl" fw={700} c="teal">{bonus} {currency}</Text>
+            </Group>
+            <Group justify="flex-end" mt="md">
+              <Button color="teal" variant="light" onClick={() => setPromoOpen(true)}>{t('profile.enterPromo')}</Button>
             </Group>
             <Text size="xs" c="dimmed" mt="sm">{t('finance.bonusHint', 'Бонусы списываются автоматически при оплате услуг. История начислений — скоро.')}</Text>
           </Paper>
@@ -337,6 +408,7 @@ export default function Finance() {
       </Tabs>
 
       <PayModal opened={payOpen} onClose={() => setPayOpen(false)} initialAmount={payAmount} />
+      <PromoModal opened={promoOpen} onClose={() => setPromoOpen(false)} onSuccess={loadForecast} />
     </Stack>
   );
 }

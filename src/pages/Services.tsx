@@ -90,6 +90,7 @@ function ServiceDetail({ service, onDelete, onChangeTariff }: ServiceDetailProps
   const [forecastLoading, setForecastLoading] = useState(false);
   const [forecastCost, setForecastCost] = useState<number | null>(null);
   const [forecastNext, setForecastNext] = useState<{ name: string; cost: number } | null>(null);
+  const [withdrawCost, setWithdrawCost] = useState<number | null>(null);
   const [paySystems, setPaySystems] = useState<PaySystem[]>([]);
   const [selectedPaySystem, setSelectedPaySystem] = useState<string | null>(null);
   const [payAmount, setPayAmount] = useState<number | string>(0);
@@ -153,6 +154,26 @@ function ServiceDetail({ service, onDelete, onChangeTariff }: ServiceDetailProps
     };
     fetchForecast();
   }, [service.user_service_id, isNotPaid]);
+
+  useEffect(() => {
+    // Индивидуальная цена услуги = последнее списание (us.withdraw.cost), как в боте keenetic
+    const fetchWithdrawCost = async () => {
+      try {
+        const response = await userApi.getWithdrawals({
+          filter: { user_service_id: service.user_service_id },
+          sort_field: 'withdraw_date',
+          sort_direction: 'desc',
+          limit: 1,
+        });
+        const rows = response.data.data || [];
+        if (rows.length > 0 && typeof rows[0].cost === 'number') {
+          setWithdrawCost(rows[0].cost);
+        }
+      } catch {
+      }
+    };
+    fetchWithdrawCost();
+  }, [service.user_service_id]);
 
   const loadPaySystems = async () => {
     if (paySystems.length > 0) return;
@@ -408,7 +429,7 @@ function ServiceDetail({ service, onDelete, onChangeTariff }: ServiceDetailProps
             </Group>
             <Group justify="space-between">
               <Text size="sm" c="dimmed">{t('services.cost')}:</Text>
-              <Text size="sm">{forecastCost ?? service.service.cost} {t('common.currency')}</Text>
+              <Text size="sm">{withdrawCost ?? forecastCost ?? service.service.cost} {t('common.currency')}</Text>
             </Group>
             {service.expire && (
               <Group justify="space-between">

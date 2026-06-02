@@ -35,7 +35,6 @@ function isPdf(value: string) {
 
 function LegalLinks() {
   const { t } = useTranslation();
-  const user = useStore((s) => s.user);
   const [docUrl, setDocUrl] = useState<string | null>(null);
   const [docTitle, setDocTitle] = useState('');
 
@@ -54,7 +53,7 @@ function LegalLinks() {
   const hasContacts = contactLinks.length > 0;
   const hasLegal = legalLinks.length > 0;
 
-  if (!hasLegal && !hasContacts && !user) return null;
+  if (!hasLegal && !hasContacts) return null;
 
   return (
     <>
@@ -65,12 +64,6 @@ function LegalLinks() {
         title={docTitle}
       />
       <Stack gap={0}>
-        {user && (
-          <Group justify="center" gap={6} py="xs">
-            <Text size="xs" c="dimmed">{t('profile.balance')}:</Text>
-            <Text size="xs" fw={600} c="cyan">{user.balance ?? '0.00'} {t('common.currency')}</Text>
-          </Group>
-        )}
         {hasLegal && (
           <Group justify="center" gap="md" wrap="wrap" py="sm">
             {legalLinks.map((link) =>

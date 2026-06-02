@@ -248,18 +248,34 @@ export default function Finance() {
       <Title order={2}>{t('nav.finance')}</Title>
 
       <Paper withBorder radius="md" p="lg">
-        <Group justify="space-between" align="center" wrap="wrap" gap="sm">
-          <div>
-            <Text size="sm" c="dimmed">{t('profile.balance')}</Text>
-            <Text size="xl" fw={700} c="cyan">{balance} {currency}</Text>
-          </div>
-          <Button
-            leftSection={<IconCreditCard size={18} />}
-            color={toPayTotal > 0 ? 'red' : 'cyan'}
-            onClick={() => openPay(toPayTotal > 0 ? toPayTotal : undefined)}
-          >
-            {toPayTotal > 0 ? `${t('profile.toPay')} ${toPayTotal} ${currency}` : t('finance.topUp', 'Пополнить баланс')}
-          </Button>
+        <Group justify="space-between" align="center" wrap="wrap" gap="md">
+          <Group gap="xl" wrap="wrap">
+            <div>
+              <Text size="sm" c="dimmed">{t('profile.balance')}</Text>
+              <Text size="xl" fw={700} c="cyan">{balance} {currency}</Text>
+            </div>
+            <div>
+              <Text size="sm" c="dimmed">{t('profile.bonus')}</Text>
+              <Text size="xl" fw={700} c="teal">{bonus} {currency}</Text>
+            </div>
+          </Group>
+          <Group gap="sm" wrap="wrap">
+            <Button
+              leftSection={<IconCreditCard size={18} />}
+              color={toPayTotal > 0 ? 'red' : 'cyan'}
+              onClick={() => openPay(toPayTotal > 0 ? toPayTotal : undefined)}
+            >
+              {toPayTotal > 0 ? `${t('profile.toPay')} ${toPayTotal} ${currency}` : t('finance.topUp', 'Пополнить баланс')}
+            </Button>
+            <Button
+              variant="light"
+              color="teal"
+              leftSection={<IconGift size={18} />}
+              onClick={() => setPromoOpen(true)}
+            >
+              {t('profile.enterPromo')}
+            </Button>
+          </Group>
         </Group>
 
         {toPayTotal > 0 && (
@@ -398,9 +414,6 @@ export default function Finance() {
             <Group justify="space-between" align="center">
               <Group gap="xs"><IconGift size={22} color="#37b24d" /><Text fw={500}>{t('profile.bonus')}</Text></Group>
               <Text size="xl" fw={700} c="teal">{bonus} {currency}</Text>
-            </Group>
-            <Group justify="flex-end" mt="md">
-              <Button color="teal" variant="light" onClick={() => setPromoOpen(true)}>{t('profile.enterPromo')}</Button>
             </Group>
             <Text size="xs" c="dimmed" mt="sm">{t('finance.bonusHint', 'Бонусы списываются автоматически при оплате услуг. История начислений — скоро.')}</Text>
           </Paper>

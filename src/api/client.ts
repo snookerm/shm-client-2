@@ -163,7 +163,7 @@ export const userApi = {
     return api.get('/user/pay', { params: { ...rest, ...(filter ? { filter: JSON.stringify(filter) } : {}) } });
   },
   getPaySystems: () => api.get('/user/pay/paysystems'),
-  getForecast: () => api.get('/user/pay/forecast'),
+  getForecast: (params?: { days?: number; blocked?: number }) => api.get('/user/pay/forecast', { params }),
   deleteAutopayment: (paySystem: string) => api.delete('/user/autopayment', { params: { pay_system: paySystem } }),
   getWithdrawals: (params?: { limit?: number; offset?: number; sort_field?: string; sort_direction?: string; filter?: Record<string, unknown> }) => {
     const { filter, ...rest } = params || {};

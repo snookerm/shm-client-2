@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Stack, Title, Tabs, Text, Center, Loader, Paper, Pagination, LoadingOverlay, ScrollArea, Group } from '@mantine/core';
+import { Stack, Title, Tabs, Text, Center, Loader, Paper, Pagination, LoadingOverlay, ScrollArea, Group, Button, Divider } from '@mantine/core';
 import { IconCreditCard, IconReceipt, IconGift } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { userApi } from '../api/client';
 import DataTable, { Column } from '../components/DataTable';
 import { useStore } from '../store/useStore';
+import PayModal from '../components/PayModal';
 
 interface Payment {
   id: number;
@@ -22,6 +23,21 @@ interface Withdraw {
   qnt: number;
   withdraw_date: string;
   end_date: string;
+}
+
+interface ForecastNextItem { total: number; }
+interface ForecastItem {
+  name: string;
+  total: number;
+  status: string;
+  expire?: string;
+  next?: ForecastNextItem;
+}
+interface ForecastData {
+  balance: number;
+  dept: number;
+  total: number;
+  items: ForecastItem[];
 }
 
 const PER_PAGE = 10;
@@ -43,6 +59,22 @@ export default function Finance() {
   const { t, i18n } = useTranslation();
   const user = useStore((s) => s.user);
   const [tab, setTab] = useState<string | null>('payments');
+
+  // --- Топ-блок: баланс + сумма к оплате (forecast: активные/блок/неоплаченные/долг) ---
+  const [forecast, setForecast] = useState<ForecastData | null>(null);
+  const [payOpen, setPayOpen] = useState(false);
+  const [payAmount, setPayAmount] = useState<number | undefined>(undefined);
+
+  useEffect(() => {
+    userApi
+      .getForecast({ days: 30, blocked: 1 })
+      .then((r) => {
+        const d = r.data.data;
+        if (Array.isArray(d) && d.length) setForecast(d[0]);
+        else if (d && !Array.isArray(d)) setForecast(d);
+      })
+      .catch(() => {});
+  }, []);
 
   // --- Платежи ---
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -180,9 +212,63 @@ export default function Finance() {
   const payTotalPages = Math.ceil(payTotal / PER_PAGE);
   const wdTotalPages = Math.ceil(wdTotal / PER_PAGE);
 
+  // Сумма к оплате по типам (как в боте: amt = expire ? next.total : total)
+  const itemAmount = (it: ForecastItem) => (it.expire ? (it.next?.total || 0) : (it.total || 0));
+  let dueRenewal = 0, blockedSum = 0, notPaidSum = 0;
+  (forecast?.items || []).forEach((it) => {
+    const amt = itemAmount(it);
+    if (it.status === 'NOT PAID') notPaidSum += amt;
+    else if (it.status === 'BLOCK') blockedSum += amt;
+    else dueRenewal += amt;
+  });
+  const debt = forecast?.dept || 0;
+  const toPayTotal = forecast?.total ?? (debt + dueRenewal + blockedSum + notPaidSum);
+  const balance = forecast?.balance ?? 0;
+  const currency = t('common.currency');
+  const openPay = (amount?: number) => { setPayAmount(amount); setPayOpen(true); };
+
+  const subRow = (label: string, value: number) => (
+    <Group justify="space-between" pl="sm">
+      <Text size="sm" c="dimmed">{label}</Text>
+      <Text size="sm">{value} {currency}</Text>
+    </Group>
+  );
+
   return (
     <Stack gap="lg">
       <Title order={2}>{t('nav.finance')}</Title>
+
+      <Paper withBorder radius="md" p="lg">
+        <Group justify="space-between" align="center" wrap="wrap" gap="sm">
+          <div>
+            <Text size="sm" c="dimmed">{t('profile.balance')}</Text>
+            <Text size="xl" fw={700} c="cyan">{balance} {currency}</Text>
+          </div>
+          <Button
+            leftSection={<IconCreditCard size={18} />}
+            color={toPayTotal > 0 ? 'red' : 'cyan'}
+            onClick={() => openPay(toPayTotal > 0 ? toPayTotal : undefined)}
+          >
+            {toPayTotal > 0 ? `${t('profile.toPay')} ${toPayTotal} ${currency}` : t('finance.topUp', 'Пополнить баланс')}
+          </Button>
+        </Group>
+
+        {toPayTotal > 0 && (
+          <>
+            <Divider my="md" />
+            <Stack gap={6}>
+              <Group justify="space-between">
+                <Text fw={600} c="red">{t('profile.toPay')}</Text>
+                <Text fw={700} c="red">{toPayTotal} {currency}</Text>
+              </Group>
+              {dueRenewal > 0 && subRow(t('finance.dueRenewal', 'Активные услуги (к продлению)'), dueRenewal)}
+              {blockedSum > 0 && subRow(t('finance.blockedServices', 'Заблокированные услуги'), blockedSum)}
+              {notPaidSum > 0 && subRow(t('finance.newUnpaid', 'Новые услуги (не оплачены)'), notPaidSum)}
+              {debt > 0 && subRow(t('finance.debt', 'Долг за оказанные услуги'), debt)}
+            </Stack>
+          </>
+        )}
+      </Paper>
 
       <Tabs value={tab} onChange={setTab} keepMounted={false}>
         <Tabs.List>
@@ -249,6 +335,8 @@ export default function Finance() {
           </Paper>
         </Tabs.Panel>
       </Tabs>
+
+      <PayModal opened={payOpen} onClose={() => setPayOpen(false)} initialAmount={payAmount} />
     </Stack>
   );
 }

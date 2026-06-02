@@ -103,6 +103,15 @@
     "withdrawals": "Withdrawals",
     "finance": "Finance"
   },
+  "finance": {
+    "topUp": "Top up balance",
+    "toPayTotal": "To pay",
+    "dueRenewal": "Active services (renewal)",
+    "blockedServices": "Blocked services",
+    "newUnpaid": "New services (unpaid)",
+    "debt": "Debt for services",
+    "bonusHint": "Bonuses are spent automatically when paying for services. Accrual history — coming soon."
+  },
   "profile": {
     "title": "Profile",
     "balance": "Balance",

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Stack, Title, Tabs, Text, Center, Loader, Paper, Pagination, LoadingOverlay, ScrollArea, Group, Button, Divider, Collapse } from '@mantine/core';
+import { Stack, Title, Tabs, Text, Center, Loader, Paper, Pagination, LoadingOverlay, ScrollArea, Group, Button, Divider, Collapse, SimpleGrid } from '@mantine/core';
 import { IconCreditCard, IconReceipt, IconGift, IconChevronDown, IconChevronUp } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { userApi } from '../api/client';
@@ -248,35 +248,36 @@ export default function Finance() {
       <Title order={2}>{t('nav.finance')}</Title>
 
       <Paper withBorder radius="md" p="lg">
-        <Group justify="space-between" align="center" wrap="wrap" gap="md">
-          <Group gap="xl" wrap="wrap">
-            <div>
-              <Text size="sm" c="dimmed">{t('profile.balance')}</Text>
-              <Text size="xl" fw={700} c="cyan">{balance} {currency}</Text>
-            </div>
-            <div>
-              <Text size="sm" c="dimmed">{t('profile.bonus')}</Text>
-              <Text size="xl" fw={700} c="teal">{bonus} {currency}</Text>
-            </div>
-          </Group>
-          <Group gap="sm" wrap="wrap">
-            <Button
-              leftSection={<IconCreditCard size={18} />}
-              color={toPayTotal > 0 ? 'red' : 'cyan'}
-              onClick={() => openPay(toPayTotal > 0 ? toPayTotal : undefined)}
-            >
-              {toPayTotal > 0 ? `${t('profile.toPay')} ${toPayTotal} ${currency}` : t('finance.topUp', 'Пополнить баланс')}
-            </Button>
-            <Button
-              variant="light"
-              color="teal"
-              leftSection={<IconGift size={18} />}
-              onClick={() => setPromoOpen(true)}
-            >
-              {t('profile.enterPromo')}
-            </Button>
-          </Group>
-        </Group>
+        <SimpleGrid cols={2} spacing="xl">
+          <div>
+            <Text size="sm" c="dimmed">{t('profile.balance')}</Text>
+            <Text size="xl" fw={700} c={balance < 0 ? 'red' : 'cyan'}>{balance} {currency}</Text>
+          </div>
+          <div>
+            <Text size="sm" c="dimmed">{t('profile.bonus')}</Text>
+            <Text size="xl" fw={700} c={bonus > 0 ? 'teal' : 'dimmed'}>{bonus} {currency}</Text>
+          </div>
+        </SimpleGrid>
+
+        <SimpleGrid cols={{ base: 1, xs: 2 }} spacing="sm" mt="lg">
+          <Button
+            fullWidth
+            leftSection={<IconCreditCard size={18} />}
+            color={toPayTotal > 0 ? 'red' : 'cyan'}
+            onClick={() => openPay(toPayTotal > 0 ? toPayTotal : undefined)}
+          >
+            {toPayTotal > 0 ? `${t('profile.toPay')} ${toPayTotal} ${currency}` : t('finance.topUp', 'Пополнить баланс')}
+          </Button>
+          <Button
+            fullWidth
+            variant="light"
+            color="teal"
+            leftSection={<IconGift size={18} />}
+            onClick={() => setPromoOpen(true)}
+          >
+            {t('profile.enterPromo')}
+          </Button>
+        </SimpleGrid>
 
         {toPayTotal > 0 && (
           <>

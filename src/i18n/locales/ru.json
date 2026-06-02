@@ -100,7 +100,8 @@
     "services": "Услуги",
     "tickets": "Поддержка",
     "payments": "Платежи",
-    "withdrawals": "Списания"
+    "withdrawals": "Списания",
+    "finance": "Финансы"
   },
   "profile": {
     "title": "Профиль",

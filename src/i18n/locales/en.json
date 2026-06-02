@@ -100,7 +100,8 @@
     "services": "Services",
     "tickets": "Support",
     "payments": "Payments",
-    "withdrawals": "Withdrawals"
+    "withdrawals": "Withdrawals",
+    "finance": "Finance"
   },
   "profile": {
     "title": "Profile",

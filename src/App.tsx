@@ -25,6 +25,7 @@ parseAndSavePartnerId();
 
 import Services from './pages/Services';
 import Profile from './pages/Profile';
+import Finance from './pages/Finance';
 import Tickets from './pages/Tickets.tsx';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
@@ -285,7 +286,7 @@ function BottomNavigation({ onPayments, onWithdrawals }: { onPayments: () => voi
             const isActive = location.pathname === item.path;
             const Icon = item.icon;
             const showDot = (item.path as string) === '/tickets' && hasNewTicketMessages;
-            const isItemBlocked = emailBlocked && (item.path === '/payments' || item.path === '/withdrawals');
+            const isItemBlocked = emailBlocked && ((item.path as string) === '/payments' || (item.path as string) === '/withdrawals');
             return (
               <Box
                 key={item.path}
@@ -550,6 +551,7 @@ function AppContent() {
             <Routes>
               <Route path="/" element={<Services />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/finance" element={<Finance />} />
               <Route path="/tickets" element={<Tickets />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
@@ -612,14 +614,14 @@ function AppContent() {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.path;
                 const showDot = (item.path as string) === '/tickets' && hasNewTicketMessages;
-                if (item.path === '/payments') {
+                if ((item.path as string) === '/payments') {
                   return (
                     <Button key={item.path} leftSection={<Icon size={16} />} variant="subtle" size="xs" radius="md" disabled={emailBlocked} onClick={() => emailBlocked ? setOpenEmailModal(true) : setPayHistoryOpen(true)}>
                       {t(item.labelKey)}
                     </Button>
                   );
                 }
-                if (item.path === '/withdrawals') {
+                if ((item.path as string) === '/withdrawals') {
                   return (
                     <Button key={item.path} leftSection={<Icon size={16} />} variant="subtle" size="xs" radius="md" disabled={emailBlocked} onClick={() => emailBlocked ? setOpenEmailModal(true) : setWithdrawHistoryOpen(true)}>
                       {t(item.labelKey)}
@@ -679,6 +681,7 @@ function AppContent() {
           <Routes>
             <Route path="/" element={<Services />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/finance" element={<Finance />} />
             <Route path="/tickets" element={<Tickets />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

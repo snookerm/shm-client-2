@@ -204,7 +204,7 @@ function WebAppHeader() {
     <Group justify="flex-end" p="sm" gap="xs" wrap="nowrap">
       {user && (
         <Group gap="sm" wrap="wrap" style={{ flex: 1, minWidth: 0, rowGap: 2 }}>
-          <Text size="xs" fw={600}>{user.login}</Text>
+          <Text size="xs"><Text span c="dimmed">{t('profile.login')}:</Text> <Text span fw={600}>{user.login}</Text></Text>
           <Text size="xs" c="dimmed">ID: {user.user_id}</Text>
           <Group gap={3} wrap="nowrap"><IconWallet size={14} color="#22b8cf" /><Text size="xs" fw={700} c="cyan">{user.balance ?? '0.00'} {t('common.currency')}</Text></Group>
           {user.bonus > 0 && (
@@ -652,7 +652,7 @@ function AppContent() {
             <Group wrap="nowrap">
               {user && (
                 <Group gap="sm" wrap="nowrap" visibleFrom="md">
-                  <Text size="sm" fw={600}>{user.login}</Text>
+                  <Text size="sm"><Text span c="dimmed">{t('profile.login')}:</Text> <Text span fw={600}>{user.login}</Text></Text>
                   <Text size="sm" c="dimmed">ID: {user.user_id}</Text>
                   <Group gap={3} wrap="nowrap"><IconWallet size={15} color="#22b8cf" /><Text size="sm" fw={600} c="cyan">{user.balance ?? '0.00'} {t('common.currency')}</Text></Group>
                   {user.bonus > 0 && <Group gap={3} wrap="nowrap"><IconGift size={15} color="#37b24d" /><Text size="sm">{user.bonus} {t('common.currency')}</Text></Group>}

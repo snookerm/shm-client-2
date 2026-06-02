@@ -22,6 +22,7 @@ interface ForecastItem {
   total: number;
   status: string;
   user_service_id: string;
+  next?: { name: string; cost: number };
 }
 
 interface PaySystem {
@@ -87,6 +88,8 @@ function ServiceDetail({ service, onDelete, onChangeTariff }: ServiceDetailProps
 
   const [forecastTotal, setForecastTotal] = useState<number | null>(null);
   const [forecastLoading, setForecastLoading] = useState(false);
+  const [forecastCost, setForecastCost] = useState<number | null>(null);
+  const [forecastNext, setForecastNext] = useState<{ name: string; cost: number } | null>(null);
   const [paySystems, setPaySystems] = useState<PaySystem[]>([]);
   const [selectedPaySystem, setSelectedPaySystem] = useState<string | null>(null);
   const [payAmount, setPayAmount] = useState<number | string>(0);
@@ -118,7 +121,6 @@ function ServiceDetail({ service, onDelete, onChangeTariff }: ServiceDetailProps
   const isNotPaid = service.status === 'NOT PAID';
 
   useEffect(() => {
-    if (!isNotPaid) return;
     const fetchForecast = async () => {
       setForecastLoading(true);
       try {
@@ -131,10 +133,15 @@ function ServiceDetail({ service, onDelete, onChangeTariff }: ServiceDetailProps
             (it: ForecastItem) => String(it.user_service_id) === String(service.user_service_id)
           );
           if (item) {
-            const needToPay = Math.max(0, Math.ceil((item.total - balance) * 100) / 100);
-            setForecastTotal(needToPay);
-            setPayAmount(needToPay);
-          } else if (forecast.total > 0) {
+            // актуальная (в т.ч. индивидуальная) цена и следующий тариф — из forecast
+            if (typeof item.cost === 'number') setForecastCost(item.cost);
+            if (item.next && item.next.name) setForecastNext({ name: item.next.name, cost: item.next.cost });
+            if (isNotPaid) {
+              const needToPay = Math.max(0, Math.ceil((item.total - balance) * 100) / 100);
+              setForecastTotal(needToPay);
+              setPayAmount(needToPay);
+            }
+          } else if (isNotPaid && forecast.total > 0) {
             setForecastTotal(forecast.total);
             setPayAmount(Math.max(0, Math.ceil(forecast.total * 100) / 100));
           }
@@ -401,7 +408,7 @@ function ServiceDetail({ service, onDelete, onChangeTariff }: ServiceDetailProps
             </Group>
             <Group justify="space-between">
               <Text size="sm" c="dimmed">{t('services.cost')}:</Text>
-              <Text size="sm">{service.service.cost} {t('common.currency')}</Text>
+              <Text size="sm">{forecastCost ?? service.service.cost} {t('common.currency')}</Text>
             </Group>
             {service.expire && (
               <Group justify="space-between">
@@ -412,12 +419,14 @@ function ServiceDetail({ service, onDelete, onChangeTariff }: ServiceDetailProps
             {service.next && (
               <Group justify="space-between">
                 <Text size="sm" c="dimmed">{t('services.validUntilNext')}:</Text>
-                {nextServiceLoading ? (
-                  <Text size="sm">{t('common.loading')}</Text>
+                {forecastNext ? (
+                  <Text size="sm">{forecastNext.name} - {forecastNext.cost} {t('common.currency')}</Text>
                 ) : nextServiceInfo ? (
                   <Text size="sm">{nextServiceInfo.name} - {nextServiceInfo.cost} {t('common.currency')}</Text>
+                ) : nextServiceLoading ? (
+                  <Text size="sm">{t('common.loading')}</Text>
                 ) : (
-                  <Text size="sm">{service.next}</Text>
+                  <Text size="sm">{service.service.name}</Text>
                 )}
               </Group>
             )}
